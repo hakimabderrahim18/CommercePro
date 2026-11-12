@@ -1,95 +1,99 @@
-# Commerce Pro 🛒📦
+# Commerce Pro 🛒📦⚡
 
-Application Desktop professionnelle de **Gestion Commerciale**, **Gestion de Stock**, **Facturation/Tickets avec QR Code** et **Suivi des Comptes & Dettes Clients**, conçue avec **Electron.js**, **React**, **Node.js** et **MongoDB**.
+Application Desktop tout-en-un de **Gestion Commerciale**, **Stock & Réapprovisionnement**, **Facturation & Point de Vente (POS)**, **Service Après-Vente (SAV / Réparations)** et **Trésorerie**, conçue avec **Electron.js**, **React 18**, **Tailwind CSS** et base de données embarquée **SQLite (sql.js)**.
 
 ---
 
 ## 🌟 Fonctionnalités Principales
 
-### 1. 📦 Gestion Complète de Stock
-- **Catalogue d'articles** : Référence, désignation, catégorie, prix d'achat, prix de vente, quantité, unité (pièce, kg, litre, etc.), seuil d'alerte rupture, fournisseur.
-- **Génération automatique de QR Code unique** pour chaque article, avec visualiseur et impression directe d'étiquettes de prix / codes-barres.
-- **Importation & Exportation Excel** : Importez votre stock en masse depuis n'importe quel fichier Excel (`.xlsx`) ou exportez l'inventaire en un clic.
-- **Mouvements & Réapprovisionnement** : Traçabilité des achats fournisseurs et ajustements manuels d'inventaire.
+### 1. 📦 Gestion Complète de Stock & Inventaire
+- **Catalogue d'articles** : Référence, code-barres, désignation, catégorie, prix d'achat, prix de vente, quantité en stock, seuils d'alerte, unité.
+- **Génération & Impression d'étiquettes QR Code & Code-Barres** personnalisables.
+- **Importation & Exportation Excel (`.xlsx`)** en masse.
+- **Mouvements & Historique** : Traçabilité détaillée des entrées, sorties, ventes et consommations pièces SAV.
 
-### 2. 🧾 Facturation & Caisse (POS)
-- **Point de vente rapide (Caisse)** : Recherche intelligente de produits, scanner code-barres/QR, calcul automatique des sous-totaux, TVA paramétrable et calcul du rendu/dette.
-- **Documents personnalisables** : Facture A4 ou Ticket de caisse thermique (80mm).
-- **QR Code unique sur facture** : Permet de scanner le ticket/facture pour retrouver instantanément la vente.
-- **Retours sur Vente** : Gestion des articles retournés avec ré-incrémentation automatique du stock et remboursement en espèces ou déduction sur compte client.
+### 2. 🧾 Point de Vente (POS) & Facturation
+- **Caisse rapide & ergonomique** : Recherche instantanée, lecteur code-barres/QR, remises, TVA, calcul automatique de monnaie et crédit.
+- **Tickets thermiques (80mm) et Factures A4** avec logos, mentions légales et QR code de vérification.
+- **Retours sur ventes & Avoirs** avec remise en stock automatique.
+- **Gestion des Pertes & Avaries**.
 
-### 3. 👥 Comptes Clients & Dettes
-- **Fiches clients complètes** : Coordonnées, plafond de crédit, solde dette en temps réel.
-- **Relevé de compte client (Ledger)** : Historique chronologique de chaque mouvement (crédit vente, règlement reçu, avoir).
-- **Encaissements & Décaissements** : Enregistrement simplifié des versements clients pour solder leurs dettes.
+### 3. 👥 Clients, Fournisseurs & Dettes
+- **Fiches clients & fournisseurs complètes** avec solde dette en direct.
+- **Relevé de compte chronologique (Ledger)** pour chaque tiers.
+- **Règlements, acomptes et décaissements** avec reçu imprimable.
 
-### 4. 📊 Tableau de Bord & Statistiques
-- **KPIs en temps réel** : Chiffre d'affaires du jour et de la période, marge brute, nombre de ventes, alertes de rupture de stock, total des dettes clients.
-- **Filtres de temps flexibles** : Aujourd'hui, Cette semaine, Ce mois, ou Période personnalisée (du ... au ...).
-- **Traçabilité totale** : Filtres et exports Excel pour les ventes, les mouvements de stock et les achats fournisseurs.
+### 4. 🛠️ Module SAV & Réparations Spécialisé
+- **Prise en charge d'appareils** : Client, panne déclarée, mot de passe/schéma, accessoires, devis estimatif.
+- **Consommation de pièces détachées** : Liaison directe avec le stock de produits du magasin.
+- **Gestion des techniciens** : Affectation des réparations, commissions et suivi des comptes techniciens.
+- **Impression d'étiquettes de dépôt et de fiches de sortie**.
+
+### 5. 💰 Trésorerie & Caisse Journalière
+- **Suivi des flux financiers** : Espèces, carte bancaire, virement, chèque.
+- **Clôture de caisse quotidienne** avec impression du rapport de fin de journée.
+
+### 6. 🔐 Système de Licence Matérielle Sécurisé
+- **Empreinte matérielle unique** liée à la machine (Carte mère / GUID / Processeur).
+- **Générateur de licences dédié** ([Generateur_Licences.html](Generateur_Licences.html)) pour émettre des clés d'activation permanentes ou temporaires.
+
+### 7. 🚀 Mises à Jour Automatiques en Ligne (GitHub Releases)
+- **Vérification automatique en arrière-plan** au lancement de l'application.
+- **Téléchargement & Installation en 1 clic** directement depuis GitHub Releases.
 
 ---
 
-## 🚀 Installation & Démarrage Rapide
+## 🚀 Installation & Développement
 
 ### Prérequis
-1. **Node.js** (v18 ou supérieur) : [Télécharger Node.js](https://nodejs.org)
-2. **MongoDB Community Server** (Local) : [Télécharger MongoDB Community](https://www.mongodb.com/try/download/community)
-   - Lors de l'installation de MongoDB sous Windows, laissez cochée l'option *"Install MongoD as a Service"* pour que la base de données démarre automatiquement avec Windows.
+- **Node.js** (v18 ou supérieur) : [Télécharger Node.js](https://nodejs.org)
+- *(Aucun serveur de base de données externe requis ! SQLite est autonome et embarqué).*
 
 ### Démarrage en Mode Développement
 
 ```bash
-# 1. Cloner ou ouvrir le dossier du projet
-cd CommercePost
+# 1. Cloner le projet
+git clone https://github.com/hakimabderrahim18/CommercePro.git
+cd CommercePro
 
 # 2. Installer les dépendances
 npm install
 
-# 3. Lancer l'application en mode dev (Vite + Electron)
+# 3. Lancer l'application en mode dev (React + Electron)
 npm run dev
 ```
 
 ---
 
-## 📦 Empaquetage & Création de l'Exécutable Windows (.exe)
+## 📦 Compilation & Déploiement
 
-Pour générer l'installateur Windows (`.exe` NSIS avec icône sur le bureau) :
+### Générer l'application pour Windows
 
 ```bash
 npm run build
 ```
 
-Le fichier d'installation sera généré dans le dossier `release/` (ex: `CommercePost Setup 1.0.0.exe`).
+L'exécutable final configuré avec l'icône personnalisée se trouvera dans :
+`release/win-unpacked/CommercePro.exe`
 
 ---
 
-## 🏗️ Structure du Projet
+## 🔄 Comment Publier une Nouvelle Version (Mise à Jour Client)
 
-```text
-CommercePost/
-├── electron/
-│   ├── main.js                  # Point d'entrée principal Electron
-│   ├── preload.js               # IPC Bridge sécurisé contextBridge
-│   ├── database/
-│   │   ├── connection.js        # Gestion connexion MongoDB locale
-│   │   └── models/              # Schémas Mongoose (Product, Invoice, Customer, etc.)
-│   ├── ipc/                     # Handlers IPC (Stock, Invoice, Customer, Dashboard, Print)
-│   └── utils/                   # Génération QR Code, Service Excel (ExcelJS)
-├── src/                         # Interface React (Vite + Tailwind CSS + Lucide Icons)
-│   ├── components/
-│   │   ├── dashboard/           # Tableau de bord & KPIs
-│   │   ├── stock/               # CRUD produits, étiquettes QR, import/export
-│   │   ├── invoices/            # Caisse, factures, tickets et retours
-│   │   ├── customers/           # Suivi des dettes et règlements
-│   │   ├── movements/           # Traçabilité des mouvements de stock
-│   │   └── layout/              # Sidebar et Topbar
-│   └── styles/                  # Styles Tailwind CSS et règles d'impression
-├── package.json
-└── electron-builder.yml         # Configuration d'empaquetage Windows
-```
+1. Mettre à jour la version dans [package.json](package.json) (ex: `"version": "1.0.1"`).
+2. Compiler le projet :
+   ```bash
+   npm run build
+   ```
+3. Rendez-vous sur votre dépôt GitHub :  
+   👉 [https://github.com/hakimabderrahim18/CommercePro/releases/new](https://github.com/hakimabderrahim18/CommercePro/releases/new)
+4. Renseignez le tag : `v1.0.1`.
+5. Glissez-déposez le dossier zippé ou l'exécutable `CommercePro.exe`.
+6. Cliquez sur **"Publish release"**.
+
+Dès que la release est publiée, tous vos clients recevront une notification dans leur logiciel et pourront se mettre à jour en un clic !
 
 ---
 
 ## 📄 Licence
-Développé pour **HA Softwares Académie**. Tous droits réservés.
+Propriété exclusive de **HA Softwares Académie**. Tous droits réservés.
