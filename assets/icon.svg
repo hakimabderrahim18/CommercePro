@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+  <!-- Background Shield/Card -->
+  <rect x="10" y="10" width="80" height="80" rx="20" fill="url(#grad)" />
+  <!-- Shopping Bag & Post/Mail hybrid icon -->
+  <path d="M35 38 H65 V70 C65 73.3 62.3 76 59 76 H41 C37.7 76 35 73.3 35 70 Z" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" />
+  <path d="M42 38 V31 C42 26.6 45.6 23 50 23 C54.4 23 58 26.6 58 31 V38" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+  <!-- Paper plane / Post accent -->
+  <path d="M44 52 L50 46 L56 52 M50 46 V64" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

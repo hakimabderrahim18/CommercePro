@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Générateur de Licences — Commerce Pro (HA Softwares Académie)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
+    
+    <!-- Top Header -->
+    <div class="p-6 bg-gradient-to-r from-blue-900/80 via-indigo-900/60 to-slate-900 border-b border-slate-800">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white shadow-md shadow-blue-500/20">
+          CP
+        </div>
+        <div>
+          <h1 class="text-xl font-black tracking-tight text-white">Générateur de Licences Développeur</h1>
+          <p class="text-xs text-blue-300 font-semibold">Commerce Pro • HA Softwares Académie</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="licenseForm" class="p-6 space-y-5">
+      
+      <!-- Client Name -->
+      <div>
+        <label class="block text-xs font-bold text-slate-300 mb-1.5">
+          Nom du Client / Établissement *
+        </label>
+        <input
+          type="text"
+          id="clientName"
+          required
+          placeholder="Ex: Supérette El Bahia, Établissement Benali..."
+          class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-semibold text-white focus:border-blue-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Machine ID -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-xs font-bold text-slate-300">
+            Empreinte Matérielle du PC (Machine ID) *
+          </label>
+          <span class="text-[11px] text-slate-500 font-medium">Fourni par le client</span>
+        </div>
+        <input
+          type="text"
+          id="machineId"
+          required
+          placeholder="Ex: CP-8A2F-3C91-7E4B-10DF (ou 'UNIVERSAL')"
+          class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono font-bold text-blue-400 focus:border-blue-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- License Type -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">Type de Licence</label>
+          <select
+            id="licenseType"
+            class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-bold text-slate-200 focus:border-blue-500 focus:outline-none"
+          >
+            <option value="LIFETIME">À Vie (Illimitée / Permanent)</option>
+            <option value="TIME_LIMITED">Temporaire (Durée limitée)</option>
+          </select>
+        </div>
+
+        <!-- Duration (Conditional) -->
+        <div id="durationContainer" class="hidden">
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">Durée de validité</label>
+          <select
+            id="durationDays"
+            class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-bold text-slate-200 focus:border-blue-500 focus:outline-none"
+          >
+            <option value="30">30 Jours (Essai / Mensuel)</option>
+            <option value="90">3 Mois (Trimestriel)</option>
+            <option value="180">6 Mois (Semestriel)</option>
+            <option value="365" selected>1 An (Annuel)</option>
+            <option value="730">2 Ans</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <button
+        type="submit"
+        class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm rounded-xl shadow-lg shadow-blue-600/30 transition cursor-pointer flex items-center justify-center gap-2"
+      >
+        <span>Générer la Clé d'Activation</span>
+      </button>
+
+      <!-- Output Result Box -->
+      <div id="resultBox" class="hidden pt-4 border-t border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-emerald-400">Clé de Licence Générée :</span>
+          <button
+            type="button"
+            id="copyBtn"
+            class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span id="copyText">Copier la Clé</span>
+          </button>
+        </div>
+
+        <textarea
+          id="generatedKey"
+          readonly
+          rows="4"
+          class="w-full p-3 bg-slate-950 border border-emerald-500/40 rounded-xl text-xs font-mono font-medium text-emerald-300 focus:outline-none select-all"
+        ></textarea>
+
+        <p class="text-[11px] text-slate-400">
+          Envoyez cette clé complète au client. Il lui suffira de la coller dans la fenêtre d'activation pour débloquer le logiciel.
+        </p>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    const MASTER_SECRET = 'HA_SOFTWARES_ACADEMIE_COMMERCEPOST_MASTER_SECRET_2026_@PROD';
+
+    const licenseTypeSelect = document.getElementById('licenseType');
+    const durationContainer = document.getElementById('durationContainer');
+    const form = document.getElementById('licenseForm');
+    const resultBox = document.getElementById('resultBox');
+    const generatedKeyArea = document.getElementById('generatedKey');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyText = document.getElementById('copyText');
+
+    licenseTypeSelect.addEventListener('change', () => {
+      if (licenseTypeSelect.value === 'TIME_LIMITED') {
+        durationContainer.classList.remove('hidden');
+      } else {
+        durationContainer.classList.add('hidden');
+      }
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const clientName = document.getElementById('clientName').value.trim();
+      const machineId = document.getElementById('machineId').value.trim().toUpperCase();
+      const type = licenseTypeSelect.value;
+      const days = parseInt(document.getElementById('durationDays').value, 10);
+
+      let expiry = null;
+      if (type === 'TIME_LIMITED') {
+        const expDate = new Date();
+        expDate.setDate(expDate.getDate() + days);
+        expiry = expDate.toISOString();
+      }
+
+      const payload = {
+        client: clientName,
+        machineId: machineId,
+        type: type,
+        expiry: expiry,
+        issuedAt: new Date().toISOString()
+      };
+
+      const payloadJson = JSON.stringify(payload);
+      // Encode UTF-8 to Base64
+      const words = CryptoJS.enc.Utf8.parse(payloadJson);
+      const payloadB64 = CryptoJS.enc.Base64.stringify(words);
+
+      // Signature HMAC-SHA256
+      const signature = CryptoJS.HmacSHA256(payloadB64, MASTER_SECRET).toString(CryptoJS.enc.Hex);
+
+      const fullKey = 'LIC-' + payloadB64 + '.' + signature;
+
+      generatedKeyArea.value = fullKey;
+      resultBox.classList.remove('hidden');
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(generatedKeyArea.value);
+      copyText.innerText = 'Copié !';
+      setTimeout(() => {
+        copyText.innerText = 'Copier la Clé';
+      }, 2500);
+    });
+  </script>
+</body>
+</html>

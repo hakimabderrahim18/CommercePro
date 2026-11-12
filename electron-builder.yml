@@ -1,0 +1,27 @@
+appId: com.hasoftwares.commercepro
+productName: Commerce Pro
+executableName: CommercePro
+copyright: Copyright © 2026 HA Softwares Académie
+
+publish:
+  provider: github
+  owner: hakimabderrahim18
+  repo: CommercePro
+  releaseType: release
+
+directories:
+  output: release
+  buildResources: assets
+
+files:
+  - "dist/**/*"
+  - "electron/**/*"
+  - "node_modules/**/*"
+  - "package.json"
+  - "assets/**/*"
+
+win:
+  icon: assets/icon.ico
+  target:
+    - target: dir
+  signAndEditExecutable: false

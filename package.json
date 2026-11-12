@@ -1,0 +1,48 @@
+{
+  "name": "commercepro",
+  "version": "1.0.0",
+  "description": "Commerce Pro - Application Desktop de Gestion Commerciale, Stock, Facturation et SAV",
+  "main": "electron/main.js",
+  "private": true,
+  "author": "HA Softwares Académie",
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"wait-on -i 100 -t 5000 http://127.0.0.1:5173 && cross-env NODE_ENV=development electron .\"",
+    "build:react": "vite build",
+    "build:electron": "electron-builder --dir && node scripts/inject-icon.js",
+    "build": "npm run build:react && npm run build:electron",
+    "pack": "electron-builder --dir && node scripts/inject-icon.js",
+    "seed": "node electron/database/seed.js",
+    "clean:db": "node scripts/clean-db.js",
+    "keygen": "node electron/licensing/keygen.js",
+    "publish:release": "electron-builder --publish always"
+  },
+  "dependencies": {
+    "bwip-js": "^4.11.4",
+    "date-fns": "^3.6.0",
+    "electron-updater": "^6.8.11",
+    "exceljs": "^4.4.0",
+    "jsbarcode": "^3.12.3",
+    "lucide-react": "^0.475.0",
+    "mongoose": "^8.9.5",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sql.js": "^1.14.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.6",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^34.2.0",
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.2",
+    "postcss": "^8.5.1",
+    "rcedit": "^5.0.2",
+    "sharp": "^0.35.4",
+    "tailwindcss": "^4.0.6",
+    "vite": "^6.1.0",
+    "wait-on": "^8.0.2"
+  }
+}

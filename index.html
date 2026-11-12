@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        console.error("FATAL ERROR IN RENDERER:", msg, url, line, col, error);
+        var errDiv = document.createElement('div');
+        errDiv.style.cssText = 'position:fixed;inset:0;background:#fff;color:#e11d48;padding:24px;z-index:999999;font-family:sans-serif;overflow:auto;';
+        errDiv.innerHTML = '<h2 style="font-weight:900;margin-bottom:12px;">Erreur de script:</h2><pre style="background:#f1f5f9;padding:16px;border-radius:12px;white-space:pre-wrap;font-family:monospace;font-size:13px;">' + (error && error.stack ? error.stack : msg) + '</pre>';
+        document.body.appendChild(errDiv);
+      };
+      window.onunhandledrejection = function(event) {
+        console.error("UNHANDLED REJECTION IN RENDERER:", event.reason);
+      };
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Commerce Pro - Gestion Commerciale, Stock & SAV</title>
+  </head>
+  <body class="h-full antialiased font-sans text-slate-800 selection:bg-indigo-500 selection:text-white">
+    <div id="root" class="h-full flex flex-col"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
