@@ -176,7 +176,7 @@ contextBridge.exposeInMainWorld('api', {
   // Mises à jour en ligne (GitHub Releases)
   updater: {
     check: () => ipcRenderer.invoke('update:check'),
-    download: () => ipcRenderer.invoke('update:download'),
+    download: (url) => ipcRenderer.invoke('update:download', url),
     install: () => ipcRenderer.invoke('update:install'),
     getVersion: () => ipcRenderer.invoke('update:getVersion'),
     openReleaseUrl: (url) => ipcRenderer.invoke('update:openReleaseUrl', url),
