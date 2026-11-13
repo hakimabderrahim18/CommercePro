@@ -24,7 +24,7 @@ import TransactionReceiptModal from './TransactionReceiptModal';
 import DailyCaissePrintModal from './DailyCaissePrintModal';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function TreasuryView() {
+export default function TreasuryView({ isActive = true }) {
   const { t, isRTL } = useLanguage();
   const [transactions, setTransactions] = useState([]);
   const [stats, setStats] = useState({
@@ -105,6 +105,22 @@ export default function TreasuryView() {
   useEffect(() => {
     fetchTransactions();
   }, [typeFilter, search, modePaiement, categorie, caisseFilter, period, startDate, endDate]);
+
+  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
+  useEffect(() => {
+    if (isActive) {
+      fetchTransactions();
+    }
+  }, [isActive]);
+
+  // Synchronisation temps réel : Recharger immédiatement sur toute modification
+  useEffect(() => {
+    const handleDataChange = () => {
+      fetchTransactions();
+    };
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, []);
 
   const handleOpenCreate = (type) => {
     setCreateType(type);

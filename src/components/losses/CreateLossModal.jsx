@@ -113,6 +113,7 @@ export default function CreateLossModal({ isOpen, onClose, onSuccess }) {
       });
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'loss', data: res.data } }));
         if (onSuccess) onSuccess(res.data);
         onClose();
       } else {

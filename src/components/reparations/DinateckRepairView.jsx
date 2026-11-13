@@ -244,6 +244,7 @@ export default function DinateckRepairView({
       }, currentUser);
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'reparation-piece' } }));
         showNotification('Pièce ajoutée avec succès et déduite du stock.');
         setSelectedRep(res.data);
         setEditForm({ ...res.data });
@@ -270,6 +271,7 @@ export default function DinateckRepairView({
       }, currentUser);
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'reparation-piece' } }));
         showNotification('Pièce retirée et réintégrée dans le stock.');
         setSelectedRep(res.data);
         setEditForm({ ...res.data });

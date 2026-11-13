@@ -68,9 +68,13 @@ function persistToDisk() {
     // Also sync to userData if in dev mode to keep external tools in sync
     try {
       if (process.env.APPDATA) {
-        const uPath = path.join(process.env.APPDATA, 'commercepost', 'data', 'commercepost.db');
-        if (uPath !== primaryPath && fs.existsSync(path.dirname(uPath))) {
-          fs.writeFileSync(uPath, buffer);
+        const uPathPro = path.join(process.env.APPDATA, 'commercepro', 'data', 'commercepost.db');
+        if (uPathPro !== primaryPath && fs.existsSync(path.dirname(uPathPro))) {
+          fs.writeFileSync(uPathPro, buffer);
+        }
+        const uPathOld = path.join(process.env.APPDATA, 'commercepost', 'data', 'commercepost.db');
+        if (uPathOld !== primaryPath && fs.existsSync(path.dirname(uPathOld))) {
+          fs.writeFileSync(uPathOld, buffer);
         }
       }
     } catch (e) {}

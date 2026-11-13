@@ -361,6 +361,7 @@ export default function ProductModal({ isOpen, onClose, product, onSaved, onProd
       }
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'product', data: res.data } }));
         setSaveSuccess(product ? 'Produit mis à jour avec succès !' : 'Produit enregistré avec succès et code-barres généré !');
         setTimeout(() => {
           if (onSaved) onSaved(res.product || res.data || payload);

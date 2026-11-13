@@ -523,7 +523,7 @@ function registerReparationHandlers(mainWindow) {
       const addPieceTx = db.transaction(() => {
         // 1. Déduire la pièce du stock automatiquement
         const stockAvant = Number(product.quantite || 0);
-        const stockApres = Math.max(0, stockAvant - qte);
+        const stockApres = stockAvant - qte;
 
         db.prepare('UPDATE products SET quantite = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
           .run(stockApres, product.id);

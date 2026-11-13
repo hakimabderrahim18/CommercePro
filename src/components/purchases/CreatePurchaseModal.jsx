@@ -207,6 +207,7 @@ export default function CreatePurchaseModal({ isOpen, onClose, onPurchaseCreated
       });
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'purchase', data: res.data } }));
         if (onPurchaseCreated) onPurchaseCreated(res.data);
         onClose();
       } else {

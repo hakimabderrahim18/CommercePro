@@ -60,7 +60,7 @@ const STOCK_EXPORT_COLUMNS = [
   { key: 'statutRupture', label: 'Statut Rupture (Alerte / OK)', group: '5. Valorisation & Statut' }
 ];
 
-export default function StockView({ onNewProductTrigger }) {
+export default function StockView({ isActive = true, onNewProductTrigger }) {
   const { t, isRTL } = useLanguage();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -114,6 +114,22 @@ export default function StockView({ onNewProductTrigger }) {
   useEffect(() => {
     fetchProducts();
   }, [search, selectedCategory, lowStockOnly]);
+
+  // Synchronisation temps réel : Recharger dès que l'onglet Stock devient actif
+  useEffect(() => {
+    if (isActive) {
+      fetchProducts();
+    }
+  }, [isActive]);
+
+  // Synchronisation temps réel : Écouter les ventes, achats et mouvements
+  useEffect(() => {
+    const handleDataChange = () => {
+      fetchProducts();
+    };
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, []);
 
   const showToast = (msg, type = 'success') => {
     setNotification({ msg, type });

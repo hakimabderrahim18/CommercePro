@@ -39,7 +39,7 @@ const MOVEMENTS_EXPORT_COLUMNS = [
   { key: 'fournisseurDoc', label: 'Fournisseur / N° Document Référence', group: '4. Valorisation & Tiers' }
 ];
 
-export default function MovementsView() {
+export default function MovementsView({ isActive = true }) {
   const { t, isRTL } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState('product-movements'); // 'product-movements' | 'movements' | 'purchases'
   const [movements, setMovements] = useState([]);
@@ -91,6 +91,22 @@ export default function MovementsView() {
   useEffect(() => {
     loadData();
   }, [selectedType, period, startDate, endDate, search]);
+
+  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
+  useEffect(() => {
+    if (isActive) {
+      loadData();
+    }
+  }, [isActive]);
+
+  // Synchronisation temps réel : Recharger immédiatement sur toute modification
+  useEffect(() => {
+    const handleDataChange = () => {
+      loadData();
+    };
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, []);
 
   const handleExportExcel = () => {
     setIsExportModalOpen(true);

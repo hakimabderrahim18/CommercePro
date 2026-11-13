@@ -153,7 +153,7 @@ function registerLossHandlers(mainWindow) {
 
       // 2. Décrémentation automatique du stock
       const qteAvant = Number(product.quantite || 0);
-      const qteApres = Math.max(0, qteAvant - quantitePerdue);
+      const qteApres = qteAvant - quantitePerdue;
 
       db.prepare('UPDATE products SET quantite = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(qteApres, productId);
 

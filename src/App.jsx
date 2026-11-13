@@ -352,17 +352,18 @@ function AppContent() {
 
   const meta = getPageMeta();
 
-  const renderTabContent = (type) => {
+  const renderTabContent = (type, isTabActive = true) => {
     switch (type) {
       case 'pos':
-        return <PosView />;
+        return <PosView isActive={isTabActive} />;
       case 'reparations':
-        return <ReparationsView />;
+        return <ReparationsView isActive={isTabActive} />;
       case 'users':
-        return <UsersManagementView />;
+        return <UsersManagementView isActive={isTabActive} />;
       case 'dashboard':
         return (
           <DashboardView
+            isActive={isTabActive}
             onNavigateToStock={() => handleOpenTab('stock')}
             onNavigateToInvoices={() => handleOpenTab('invoices')}
             onNavigateToCustomers={() => handleOpenTab('customers')}
@@ -373,25 +374,25 @@ function AppContent() {
           />
         );
       case 'stock':
-        return <StockView onNewProductTrigger={() => setIsProductModalOpen(true)} />;
+        return <StockView isActive={isTabActive} onNewProductTrigger={() => setIsProductModalOpen(true)} />;
       case 'invoices':
-        return <InvoicesView onNewSale={() => handleOpenTab('pos')} />;
+        return <InvoicesView isActive={isTabActive} onNewSale={() => handleOpenTab('pos')} />;
       case 'customers':
-        return <CustomersView />;
+        return <CustomersView isActive={isTabActive} />;
       case 'suppliers':
-        return <SuppliersView />;
+        return <SuppliersView isActive={isTabActive} />;
       case 'charges':
-        return <ChargesView />;
+        return <ChargesView isActive={isTabActive} />;
       case 'treasury':
-        return <TreasuryView />;
+        return <TreasuryView isActive={isTabActive} />;
       case 'returns':
-        return <ReturnsView />;
+        return <ReturnsView isActive={isTabActive} />;
       case 'losses':
-        return <LossesView />;
+        return <LossesView isActive={isTabActive} />;
       case 'movements':
-        return <MovementsView />;
+        return <MovementsView isActive={isTabActive} />;
       default:
-        return <PosView />;
+        return <PosView isActive={isTabActive} />;
     }
   };
 
@@ -567,7 +568,7 @@ function AppContent() {
                     onOpenNewPos={handleAddNewPos}
                   />
                 ) : (
-                  renderTabContent(tab.type)
+                  renderTabContent(tab.type, activeTab === tab.id)
                 )}
               </div>
             ))}

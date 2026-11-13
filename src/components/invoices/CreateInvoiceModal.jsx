@@ -232,6 +232,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onInvoiceCreated }
       });
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'sale', invoice: res.data } }));
         onInvoiceCreated(res.data);
         onClose();
       } else {

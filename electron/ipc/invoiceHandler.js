@@ -290,7 +290,7 @@ function registerInvoiceHandlers(mainWindow) {
             : Number(item.quantite);
 
           // Si stockDecrement est négatif (produit retourné), le stock augmente bien : newStock = currentStock - (-X) = currentStock + X
-          const newStock = Math.max(0, item.currentStock - stockDecrement);
+          const newStock = Number(item.currentStock || 0) - stockDecrement;
           updateStockStmt.run(newStock, item.productId);
 
           const typeMouv = stockDecrement < 0 ? 'RETOUR_VENTE' : 'VENTE';
@@ -766,7 +766,7 @@ function registerInvoiceHandlers(mainWindow) {
               ? (Number(item.quantite) * Number(item.piecesParSerie))
               : Number(item.quantite);
 
-            const newStock = Math.max(0, item.currentStock - deductionQty);
+            const newStock = Number(item.currentStock || 0) - deductionQty;
             updateStockStmt.run(newStock, item.productId);
 
             const movType = deductionQty < 0 ? 'RETOUR_VENTE' : 'VENTE';

@@ -15,26 +15,30 @@ function registerDashboardHandlers(mainWindow) {
       const txQueryParams = [];
       const lossQueryParams = [];
 
-      if (period === 'today') {
-        dateFilter = "date(dateFacture, 'localtime') = date('now', 'localtime')";
-        txDateFilter = "date(dateTransaction, 'localtime') = date('now', 'localtime')";
-        lossDateFilter = "date(dateDeclaration, 'localtime') = date('now', 'localtime')";
+      if (period === 'all') {
+        dateFilter = "1=1";
+        txDateFilter = "1=1";
+        lossDateFilter = "1=1";
+      } else if (period === 'today') {
+        dateFilter = "(date(dateFacture, 'localtime') = date('now', 'localtime') OR substr(dateFacture, 1, 10) = date('now', 'localtime') OR date(dateFacture) = date('now'))";
+        txDateFilter = "(date(dateTransaction, 'localtime') = date('now', 'localtime') OR substr(dateTransaction, 1, 10) = date('now', 'localtime') OR date(dateTransaction) = date('now'))";
+        lossDateFilter = "(date(dateDeclaration, 'localtime') = date('now', 'localtime') OR substr(dateDeclaration, 1, 10) = date('now', 'localtime') OR date(dateDeclaration) = date('now'))";
       } else if (period === 'yesterday') {
-        dateFilter = "date(dateFacture, 'localtime') = date('now', '-1 day', 'localtime')";
-        txDateFilter = "date(dateTransaction, 'localtime') = date('now', '-1 day', 'localtime')";
-        lossDateFilter = "date(dateDeclaration, 'localtime') = date('now', '-1 day', 'localtime')";
+        dateFilter = "(date(dateFacture, 'localtime') = date('now', '-1 day', 'localtime') OR date(dateFacture) = date('now', '-1 day'))";
+        txDateFilter = "(date(dateTransaction, 'localtime') = date('now', '-1 day', 'localtime') OR date(dateTransaction) = date('now', '-1 day'))";
+        lossDateFilter = "(date(dateDeclaration, 'localtime') = date('now', '-1 day', 'localtime') OR date(dateDeclaration) = date('now', '-1 day'))";
       } else if (period === 'week') {
-        dateFilter = "date(dateFacture, 'localtime') >= date('now', '-7 days', 'localtime')";
-        txDateFilter = "date(dateTransaction, 'localtime') >= date('now', '-7 days', 'localtime')";
-        lossDateFilter = "date(dateDeclaration, 'localtime') >= date('now', '-7 days', 'localtime')";
+        dateFilter = "(date(dateFacture, 'localtime') >= date('now', '-7 days', 'localtime') OR date(dateFacture) >= date('now', '-7 days'))";
+        txDateFilter = "(date(dateTransaction, 'localtime') >= date('now', '-7 days', 'localtime') OR date(dateTransaction) >= date('now', '-7 days'))";
+        lossDateFilter = "(date(dateDeclaration, 'localtime') >= date('now', '-7 days', 'localtime') OR date(dateDeclaration) >= date('now', '-7 days'))";
       } else if (period === 'month') {
-        dateFilter = "date(dateFacture, 'localtime') >= date('now', 'start of month', 'localtime')";
-        txDateFilter = "date(dateTransaction, 'localtime') >= date('now', 'start of month', 'localtime')";
-        lossDateFilter = "date(dateDeclaration, 'localtime') >= date('now', 'start of month', 'localtime')";
+        dateFilter = "(date(dateFacture, 'localtime') >= date('now', 'start of month', 'localtime') OR date(dateFacture) >= date('now', 'start of month'))";
+        txDateFilter = "(date(dateTransaction, 'localtime') >= date('now', 'start of month', 'localtime') OR date(dateTransaction) >= date('now', 'start of month'))";
+        lossDateFilter = "(date(dateDeclaration, 'localtime') >= date('now', 'start of month', 'localtime') OR date(dateDeclaration) >= date('now', 'start of month'))";
       } else if (period === 'year') {
-        dateFilter = "date(dateFacture, 'localtime') >= date('now', 'start of year', 'localtime')";
-        txDateFilter = "date(dateTransaction, 'localtime') >= date('now', 'start of year', 'localtime')";
-        lossDateFilter = "date(dateDeclaration, 'localtime') >= date('now', 'start of year', 'localtime')";
+        dateFilter = "(date(dateFacture, 'localtime') >= date('now', 'start of year', 'localtime') OR date(dateFacture) >= date('now', 'start of year'))";
+        txDateFilter = "(date(dateTransaction, 'localtime') >= date('now', 'start of year', 'localtime') OR date(dateTransaction) >= date('now', 'start of year'))";
+        lossDateFilter = "(date(dateDeclaration, 'localtime') >= date('now', 'start of year', 'localtime') OR date(dateDeclaration) >= date('now', 'start of year'))";
       } else if (period === 'custom' && startDate && endDate) {
         dateFilter = "date(dateFacture, 'localtime') BETWEEN ? AND ?";
         txDateFilter = "date(dateTransaction, 'localtime') BETWEEN ? AND ?";
@@ -43,9 +47,9 @@ function registerDashboardHandlers(mainWindow) {
         txQueryParams.push(startDate, endDate);
         lossQueryParams.push(startDate, endDate);
       } else {
-        dateFilter = "date(dateFacture, 'localtime') = date('now', 'localtime')";
-        txDateFilter = "date(dateTransaction, 'localtime') = date('now', 'localtime')";
-        lossDateFilter = "date(dateDeclaration, 'localtime') = date('now', 'localtime')";
+        dateFilter = "(date(dateFacture, 'localtime') = date('now', 'localtime') OR substr(dateFacture, 1, 10) = date('now', 'localtime') OR date(dateFacture) = date('now'))";
+        txDateFilter = "(date(dateTransaction, 'localtime') = date('now', 'localtime') OR substr(dateTransaction, 1, 10) = date('now', 'localtime') OR date(dateTransaction) = date('now'))";
+        lossDateFilter = "(date(dateDeclaration, 'localtime') = date('now', 'localtime') OR substr(dateDeclaration, 1, 10) = date('now', 'localtime') OR date(dateDeclaration) = date('now'))";
       }
 
       // 1. Factures sur la période
@@ -141,13 +145,13 @@ function registerDashboardHandlers(mainWindow) {
       const todayStats = db.prepare(`
         SELECT COUNT(*) as count, COALESCE(SUM(totalTTC), 0) as ca 
         FROM invoices 
-        WHERE date(dateFacture, 'localtime') = date('now', 'localtime')
+        WHERE (date(dateFacture, 'localtime') = date('now', 'localtime') OR substr(dateFacture, 1, 10) = date('now', 'localtime') OR date(dateFacture) = date('now'))
       `).get();
 
       const todayRepStats = db.prepare(`
         SELECT COUNT(*) as count, COALESCE(SUM(totalTTC), 0) as ca 
         FROM reparations 
-        WHERE statut = 'LIVRE' AND date(COALESCE(dateLivraison, updated_at), 'localtime') = date('now', 'localtime')
+        WHERE statut = 'LIVRE' AND (date(COALESCE(dateLivraison, updated_at), 'localtime') = date('now', 'localtime') OR substr(COALESCE(dateLivraison, updated_at), 1, 10) = date('now', 'localtime') OR date(COALESCE(dateLivraison, updated_at)) = date('now'))
       `).get();
 
       const todayCA = Math.round((Number(todayStats?.ca || 0) + Number(todayRepStats?.ca || 0)) * 100) / 100;

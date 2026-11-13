@@ -26,7 +26,7 @@ import CreateTransactionModal from '../treasury/CreateTransactionModal';
 import SuppliersTab from '../suppliers/SuppliersTab';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function CustomersView() {
+export default function CustomersView({ isActive = true }) {
   const { t, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState('clients'); // 'clients' | 'fournisseurs'
   const [customers, setCustomers] = useState([]);
@@ -71,6 +71,22 @@ export default function CustomersView() {
   useEffect(() => {
     fetchCustomers();
   }, [search, onlyWithDebt]);
+
+  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
+  useEffect(() => {
+    if (isActive) {
+      fetchCustomers();
+    }
+  }, [isActive]);
+
+  // Synchronisation temps réel : Recharger immédiatement sur toute modification
+  useEffect(() => {
+    const handleDataChange = () => {
+      fetchCustomers();
+    };
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, []);
 
   useEffect(() => {
     const handleCustomerUpdate = () => {

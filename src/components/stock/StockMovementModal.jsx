@@ -100,6 +100,7 @@ export default function StockMovementModal({ isOpen, onClose, product, onSaved }
       });
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'stock-movement' } }));
         onSaved();
         onClose();
       } else {

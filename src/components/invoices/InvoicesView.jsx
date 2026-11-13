@@ -42,7 +42,7 @@ const INVOICE_EXPORT_COLUMNS = [
   { key: 'notes', label: 'Notes & Remarques', group: '5. Autres' }
 ];
 
-export default function InvoicesView({ onNewSale, initialInvoiceToView }) {
+export default function InvoicesView({ isActive = true, onNewSale, initialInvoiceToView }) {
   const { t, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState('sales'); // 'sales' | 'purchases'
   const [invoices, setInvoices] = useState([]);
@@ -99,6 +99,22 @@ export default function InvoicesView({ onNewSale, initialInvoiceToView }) {
   useEffect(() => {
     fetchInvoices();
   }, [search, typeDocument, statutPaiement, period, startDate, endDate]);
+
+  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
+  useEffect(() => {
+    if (isActive) {
+      fetchInvoices();
+    }
+  }, [isActive]);
+
+  // Synchronisation temps réel : Recharger immédiatement sur toute modification
+  useEffect(() => {
+    const handleDataChange = () => {
+      fetchInvoices();
+    };
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, []);
 
   const handleFilterChange = (newFilters) => {
     fetchInvoices(newFilters);

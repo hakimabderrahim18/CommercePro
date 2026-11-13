@@ -481,7 +481,7 @@ function registerPurchaseHandlers(mainWindow) {
           if (oldIt.product_id) {
             const p = db.prepare('SELECT quantite FROM products WHERE id = ?').get(oldIt.product_id);
             if (p) {
-              const restoredQty = Math.max(0, Number(p.quantite || 0) - Number(oldIt.quantite || 0));
+              const restoredQty = Number(p.quantite || 0) - Number(oldIt.quantite || 0);
               db.prepare('UPDATE products SET quantite = ? WHERE id = ?').run(restoredQty, oldIt.product_id);
             }
           }
@@ -724,7 +724,7 @@ function registerPurchaseHandlers(mainWindow) {
             const p = db.prepare('SELECT quantite FROM products WHERE id = ?').get(it.product_id);
             if (p) {
               const currentQ = Number(p.quantite || 0);
-              const newQ = Math.max(0, currentQ - Number(it.quantite || 0));
+              const newQ = currentQ - Number(it.quantite || 0);
               db.prepare('UPDATE products SET quantite = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(newQ, it.product_id);
 
               db.prepare(`

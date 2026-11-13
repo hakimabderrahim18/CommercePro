@@ -171,6 +171,7 @@ export default function StockInventoryModal({ isOpen, onClose, onInventoryApplie
       });
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'inventory' } }));
         showToast(`Inventaire validé avec succès ! ${res.count} articles ajustés.`);
         if (onInventoryApplied) onInventoryApplied();
         setTimeout(() => {

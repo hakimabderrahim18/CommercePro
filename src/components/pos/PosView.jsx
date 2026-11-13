@@ -366,6 +366,22 @@ export default function PosView({
     }
   };
 
+  // Synchronisation temps réel : Recharger dès que l'onglet POS devient actif
+  useEffect(() => {
+    if (isActive) {
+      loadData();
+    }
+  }, [isActive]);
+
+  // Synchronisation temps réel : Recharger les produits dès qu'une modification survient ailleurs
+  useEffect(() => {
+    const handleDataChange = () => {
+      loadData();
+    };
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, []);
+
   // Synchronisation et rechargement des produits (Raccourci F7)
   const handleSyncProducts = async () => {
     try {
@@ -1287,6 +1303,9 @@ export default function PosView({
         cartRef.current = [];
         setNotes('');
         await loadData();
+
+        // Notifier immédiatement toutes les autres vues (Tableau de bord, Stock, Mouvements) en temps réel
+        window.dispatchEvent(new CustomEvent('app:refresh-data', { detail: { type: 'sale', invoice: invoiceData } }));
 
         if (shouldPrint) {
           try {

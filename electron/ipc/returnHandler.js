@@ -573,7 +573,7 @@ function registerReturnHandlers(mainWindow) {
 
           if (item.productId) {
             // Décrémenter le stock car les articles retournent chez le fournisseur
-            const newStock = Math.max(0, item.currentStock - item.quantite);
+            const newStock = Number(item.currentStock || 0) - item.quantite;
             updateStockStmt.run(newStock, item.productId);
 
             movStmt.run(
@@ -669,7 +669,7 @@ function registerReturnHandlers(mainWindow) {
           if (item.product_id) {
             const prod = db.prepare('SELECT * FROM products WHERE id = ?').get(item.product_id);
             if (prod) {
-              const newQty = Math.max(0, prod.quantite - item.quantiteRetournee);
+              const newQty = Number(prod.quantite || 0) - item.quantiteRetournee;
               db.prepare('UPDATE products SET quantite = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(newQty, prod.id);
 
               db.prepare(`

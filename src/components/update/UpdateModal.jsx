@@ -82,61 +82,8 @@ export default function UpdateModal({ isOpen, onClose, initialUpdateInfo = null 
     }
   };
 
-  const handleSimulateTest = () => {
-    setStatus('AVAILABLE');
-    setUpdateInfo({
-      success: true,
-      hasUpdate: true,
-      currentVersion: updateInfo?.currentVersion || '1.0.0',
-      latestVersion: '1.0.1',
-      releaseNotes: `🚀 Nouveautés Commerce Pro v1.0.1 :
-• Module SAV : Impression optimisée des tickets 80mm
-• Caisse & POS : Raccourcis ultra-rapides et calcul instantané de la monnaie
-• Stock : Détection instantanée des seuils d'alerte et alertes rupture
-• Mises à jour : Téléchargement automatique 1-clic direct avec barre de progression
-• Préservation intégrale et permanente de toutes vos données et licences`,
-      releaseDate: new Date().toISOString(),
-      canAutoDownload: true,
-      isSimulation: true
-    });
-  };
-
   const handleDownload = async () => {
     if (!updateInfo) return;
-
-    if (updateInfo.isSimulation) {
-      setStatus('DOWNLOADING');
-      setProgress({ percent: 0, transferred: 0, total: 42 * 1024 * 1024, bytesPerSecond: 0 });
-
-      let currentPercent = 0;
-      const totalBytes = 42 * 1024 * 1024; // 42 Mo simulation
-      const interval = setInterval(() => {
-        currentPercent += Math.floor(Math.random() * 8) + 6;
-        if (currentPercent >= 100) {
-          currentPercent = 100;
-          clearInterval(interval);
-          setProgress({
-            percent: 100,
-            transferred: totalBytes,
-            total: totalBytes,
-            bytesPerSecond: 5.4 * 1024 * 1024
-          });
-          setTimeout(() => {
-            setStatus('DOWNLOADED');
-          }, 350);
-        } else {
-          const transferred = Math.round((currentPercent / 100) * totalBytes);
-          const bytesPerSecond = Math.round((3.2 + Math.random() * 2.5) * 1024 * 1024);
-          setProgress({
-            percent: currentPercent,
-            transferred,
-            total: totalBytes,
-            bytesPerSecond
-          });
-        }
-      }, 200);
-      return;
-    }
 
     if (updateInfo.canAutoDownload) {
       try {
@@ -156,11 +103,6 @@ export default function UpdateModal({ isOpen, onClose, initialUpdateInfo = null 
   };
 
   const handleInstall = async () => {
-    if (updateInfo?.isSimulation) {
-      alert("✅ Test de mise à jour réussi !\n\nEn situation réelle, Commerce Pro se ferme, applique la nouvelle version et redémarre instantanément en conservant toutes vos données.");
-      setStatus('UP_TO_DATE');
-      return;
-    }
     try {
       await api.updater.install();
     } catch (err) {
@@ -239,7 +181,7 @@ export default function UpdateModal({ isOpen, onClose, initialUpdateInfo = null 
                   Vous disposez déjà de la version la plus récente : <span className="font-mono font-bold text-emerald-400">v{updateInfo?.currentVersion || '1.0.0'}</span>
                 </p>
               </div>
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={handleCheck}
@@ -247,14 +189,6 @@ export default function UpdateModal({ isOpen, onClose, initialUpdateInfo = null 
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Re-vérifier en ligne</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSimulateTest}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-bold rounded-xl border border-blue-500/30 transition cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>🧪 Tester la mise à jour (Simulation)</span>
                 </button>
               </div>
             </div>
@@ -417,16 +351,7 @@ export default function UpdateModal({ isOpen, onClose, initialUpdateInfo = null 
 
         {/* Footer info */}
         <div className="p-4 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-          <div className="flex items-center gap-2">
-            <span>Dépôt officiel : hakimabderrahim18/CommercePro</span>
-            <button
-              type="button"
-              onClick={handleSimulateTest}
-              className="text-blue-400 hover:text-blue-300 font-semibold underline cursor-pointer"
-            >
-              (Test Démo)
-            </button>
-          </div>
+          <span>Dépôt officiel : hakimabderrahim18/CommercePro</span>
           <span>Version actuelle : v{updateInfo?.currentVersion || '1.0.0'}</span>
         </div>
       </div>

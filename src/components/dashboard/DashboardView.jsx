@@ -21,7 +21,7 @@ import PurchaseDetailModal from '../purchases/PurchaseDetailModal';
 import { api } from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function DashboardView({ onNavigateToStock, onNavigateToInvoices, onNavigateToCustomers, onViewInvoice }) {
+export default function DashboardView({ isActive = true, onNavigateToStock, onNavigateToInvoices, onNavigateToCustomers, onViewInvoice }) {
   const { t, isRTL } = useLanguage();
   const [period, setPeriod] = useState('today');
   const [startDate, setStartDate] = useState('');
@@ -53,6 +53,22 @@ export default function DashboardView({ onNavigateToStock, onNavigateToInvoices,
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
+  useEffect(() => {
+    if (isActive) {
+      fetchDashboardData();
+    }
+  }, [isActive]);
+
+  // Synchronisation temps réel : Recharger immédiatement sur toute modification (vente, stock, SAV)
+  useEffect(() => {
+    const handleDataChange = () => {
+      fetchDashboardData();
+    };
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, [period, startDate, endDate]);
 
   const handleFilterChange = (newFilters) => {
     fetchDashboardData(newFilters);

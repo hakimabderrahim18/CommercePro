@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building, 
   Plus, 
@@ -12,7 +12,7 @@ import CreatePurchaseModal from '../purchases/CreatePurchaseModal';
 import CreateTransactionModal from '../treasury/CreateTransactionModal';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function SuppliersView() {
+export default function SuppliersView({ isActive = true }) {
   const { t } = useLanguage();
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
@@ -22,6 +22,16 @@ export default function SuppliersView() {
   const handleRefresh = () => {
     setRefreshKey(k => k + 1);
   };
+
+  useEffect(() => {
+    if (isActive) setRefreshKey(k => k + 1);
+  }, [isActive]);
+
+  useEffect(() => {
+    const handleDataChange = () => setRefreshKey(k => k + 1);
+    window.addEventListener('app:refresh-data', handleDataChange);
+    return () => window.removeEventListener('app:refresh-data', handleDataChange);
+  }, []);
 
   return (
     <div className="p-6 space-y-6">
