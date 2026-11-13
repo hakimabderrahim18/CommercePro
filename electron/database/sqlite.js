@@ -33,21 +33,16 @@ function getDbPath() {
     // Non-electron context (CLI, tests, seeds)
   }
 
-  // In development mode or CLI context, prefer the project repository database
-  if (!isPackaged) {
-    dbPath = projectDbFile;
-    return dbPath;
-  }
-
-  // In packaged production app, use userData
+  // Si on est dans Electron, toujours utiliser la base de données principale persistante
   if (userDataDbFile) {
-    // If userData DB doesn't exist yet, copy the bundled seed DB
     if (!fs.existsSync(userDataDbFile) && fs.existsSync(projectDbFile)) {
       try {
         fs.copyFileSync(projectDbFile, userDataDbFile);
-      } catch (err) {
-        console.warn('[SQLite] Impossible de copier le template initial:', err.message);
-      }
+      } catch (err) {}
+    } else if (fs.existsSync(userDataDbFile) && !fs.existsSync(projectDbFile)) {
+      try {
+        fs.copyFileSync(userDataDbFile, projectDbFile);
+      } catch (err) {}
     }
     dbPath = userDataDbFile;
     return dbPath;
@@ -65,7 +60,14 @@ function persistToDisk() {
     const primaryPath = getDbPath();
     fs.writeFileSync(primaryPath, buffer);
 
-    // Also sync to userData if in dev mode to keep external tools in sync
+    // Also sync to project data and userData to keep all tools in sync
+    try {
+      const projPath = path.resolve(__dirname, '../../data/commercepost.db');
+      if (projPath !== primaryPath && fs.existsSync(path.dirname(projPath))) {
+        fs.writeFileSync(projPath, buffer);
+      }
+    } catch (e) {}
+
     try {
       if (process.env.APPDATA) {
         const uPathPro = path.join(process.env.APPDATA, 'commercepro', 'data', 'commercepost.db');

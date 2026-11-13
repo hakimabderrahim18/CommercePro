@@ -98,7 +98,7 @@ function registerDashboardHandlers(mainWindow) {
       }
 
       // 1b. Réparations livrées (Sorties d'atelier) sur la période
-      const repDateFilter = dateFilter.replace(/dateFacture/g, "COALESCE(dateLivraison, updated_at)");
+      const repDateFilter = dateFilter.replace(/dateFacture/g, "COALESCE(r.dateLivraison, r.updated_at)");
       const deliveredReparations = db.prepare(`
         SELECT r.*, c.nom as client_nom_db, c.telephone as client_tel_db
         FROM reparations r
