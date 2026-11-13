@@ -31,6 +31,12 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
+# Générateur et clés de licence (Strictement Privé / Développeur - NE JAMAIS UPLOADER)
+Generateur_Licences.html
+*Generateur*
+*keygen*
+electron/licensing/keygen.js
+
 # Fichiers temporaires de scratch
 scratch/
 _update_shortcut.ps1
