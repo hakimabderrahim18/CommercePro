@@ -289,56 +289,206 @@ export async function printRepairLabel(rep, options = {}) {
 }
 
 /**
- * Génère le Bon de Prise en Charge / Réception (Reçu client à la dépose)
+ * Génère le Bon de Prise en Charge / Réception Réparation
+ * Modèle conforme à la photo (ex: NOUNOU TELECOM)
  */
 export function generateRepairReceiptHtml(rep, settings = null) {
   const cfg = settings || getPrinterSettings();
-  const barcodeUrl = createBarcodeDataUrl(rep.numeroReparation || 'REP-0001', { width: 2, height: 40 });
-  const dateObj = new Date(rep.dateReception || Date.now());
+
+  // En-tête de la boutique (priorité aux réglages personnalisés, avec repli sur NOUNOU TELECOM)
+  const storeName = (cfg.storeName && cfg.storeName.trim() && cfg.storeName.trim() !== 'COMMERCE PRO')
+    ? cfg.storeName.trim().toUpperCase()
+    : 'NOUNOU TELECOM';
+  const storeSubtitle = (cfg.storeSubtitle && cfg.storeSubtitle.trim())
+    ? cfg.storeSubtitle.trim().toUpperCase()
+    : 'VENTE PIECE MOBILE ET REPARATION';
+  const storeAddress = (cfg.storeAddress && cfg.storeAddress.trim())
+    ? cfg.storeAddress.trim().toUpperCase()
+    : "LAGARE A CÔTÉ DE L'ARRÊT DE BUS LA CITÉ(3)T";
+  const rawPhone = (cfg.storePhone && cfg.storePhone.trim())
+    ? cfg.storePhone.trim()
+    : '0550793369 / 0550082685';
+  const phoneText = (rawPhone.toUpperCase().startsWith('TEL') || rawPhone.toUpperCase().startsWith('EL:'))
+    ? rawPhone
+    : `TEL:${rawPhone}`;
+
+  // Date format exact comme la photo : 17/11/2026 10:20:21 AM
+  const dateObj = new Date(rep?.dateReception || Date.now());
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const year = dateObj.getFullYear();
-  const hours = String(dateObj.getHours()).padStart(2, '0');
+  let hours = dateObj.getHours();
   const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-  const dateStr = `${day}/${month}/${year} à ${hours}:${minutes}`;
+  const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const hours12 = hours % 12 || 12;
+  const dateStr = `${day}/${month}/${year} ${String(hours12).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
 
-  const devis = Number(rep.estimationDevis || 0);
-  const acompte = Number(rep.acomptePaye || 0);
-  const reste = Math.max(0, devis - acompte);
+  // Numéro de Réception & Code-Barres
+  const repNum = (rep?.numeroReparation || (rep?.id ? String(rep.id).padStart(6, '0') : '008661')).trim();
+  const barcodeValue = (rep?.codeBarre || rep?.numeroReparation || repNum).trim();
+  const barcodeUrl = createBarcodeDataUrl(barcodeValue, { width: 1.8, height: 40, margin: 2 });
+
+  // Client
+  const clientNom = (rep?.clientNom || 'Client Comptoir').trim().toUpperCase();
+  const clientTel = (rep?.clientTelephone || '-').trim();
+
+  // Appareil : Type Marque Modèle (ex: TELEPHONE OPPO A40)
+  const rawType = (rep?.appareilType || 'TELEPHONE').trim().toUpperCase();
+  const typeDisplay = rawType === 'SMARTPHONE' ? 'TELEPHONE' : rawType;
+  const marque = (rep?.marque || '').trim().toUpperCase();
+  const modele = (rep?.modele || '').trim().toUpperCase();
+  const appareilNom = [typeDisplay, marque, modele].filter(Boolean).join(' ') || 'TELEPHONE';
+
+  // Panne déclarée
+  const panneStr = (rep?.panneDeclaree || rep?.panne || rep?.constatTechnique || 'Non spécifiée').trim();
+
+  // Devis approximatif & Versement
+  const devisVal = Number(rep?.estimationDevis || rep?.totalTTC || 0);
+  const acompteVal = Number(rep?.acomptePaye || rep?.montantPaye || 0);
+
+  const formatDzDec = (n) => {
+    const parts = Number(n || 0).toFixed(2).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return `${parts.join('.')} DA`;
+  };
+
+  const devisStr = formatDzDec(devisVal);
+  const versementStr = formatDzDec(acompteVal);
 
   return `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8" />
-        <title>Bon de Prise en Charge - ${rep.numeroReparation}</title>
+        <title>Bon de Réception - ${repNum}</title>
         <style>
-          @page { margin: 0; size: auto; }
-          * { box-sizing: border-box; margin: 0; padding: 0; color: #000 !important; font-family: Arial, "Helvetica Neue", sans-serif; -webkit-print-color-adjust: exact !important; }
-          body { width: 70mm !important; max-width: 70mm !important; margin: 0 auto !important; padding: 2mm 1mm; background: #fff; font-size: 12px; font-weight: 900 !important; line-height: 1.25; overflow: hidden !important; }
-          .text-center { text-align: center; }
-          .logo-wrapper { text-align: center; margin: 0 auto 4px auto; }
-          .store-logo-img { max-width: 130px; max-height: 65px; object-fit: contain; margin: 0 auto; display: block; filter: grayscale(100%); }
-          .store-title { font-size: 18px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 1px; }
-          .store-sub { font-size: 13px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 2px; }
-          .store-contact { font-size: 11.5px; font-weight: 900 !important; }
-          .doc-title { font-size: 14.5px; font-weight: 900 !important; text-transform: uppercase; margin: 4px 0 2px 0; letter-spacing: 0.5px; }
-          .rep-num { font-size: 16px; font-weight: 900 !important; letter-spacing: 1px; margin-bottom: 2px; }
-          .divider-dashed { width: 100%; border-top: 1.5px dashed #000; margin: 4px 0; font-size: 0; }
-          .section-title { font-size: 12px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 2px; text-decoration: underline; }
-          .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.5px 0; font-size: 12px; }
-          .info-label { font-weight: 900 !important; text-transform: uppercase; }
-          .info-val { font-weight: 900 !important; text-align: right; }
-          .box-text { background: #f8fafc; border: 1px solid #000; padding: 4px; font-size: 12px; font-weight: 900 !important; margin: 2px 0 4px 0; text-align: left; }
-          .totals-table { width: 100%; border-collapse: collapse; margin: 3px 0; }
-          .totals-table td { padding: 2px 0; font-size: 13px; font-weight: 900 !important; }
-          .barcode-wrapper { text-align: center; margin: 6px auto 3px auto; }
-          .barcode-img { max-width: 85%; height: 40px; object-fit: contain; margin: 0 auto; display: block; }
-          .barcode-num { font-family: monospace; font-size: 13px; letter-spacing: 1.5px; margin-top: 2px; }
-          .clauses { font-size: 10px; font-weight: 800 !important; text-align: justify; line-height: 1.25; margin-top: 4px; }
-          .signature-box { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; font-weight: 900 !important; }
-          .sign-line { width: 45%; height: 35px; border-bottom: 1px solid #000; margin-top: 2px; }
-          .cut-space { height: 5mm; }
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            color: #000 !important;
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+            -webkit-print-color-adjust: exact !important;
+          }
+          body {
+            width: 70mm !important;
+            max-width: 70mm !important;
+            margin: 0 auto !important;
+            padding: 3mm 1mm;
+            background: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.35;
+            text-align: center;
+            overflow: hidden !important;
+          }
+          .logo-wrapper {
+            text-align: center;
+            margin: 0 auto 3px auto;
+          }
+          .store-logo-img {
+            max-width: 120px;
+            max-height: 55px;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+          }
+          .store-name {
+            font-size: 16px;
+            font-weight: 900 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+          }
+          .store-sub {
+            font-size: 11px;
+            font-weight: 800 !important;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+          }
+          .store-contact {
+            font-size: 11px;
+            font-weight: 800 !important;
+            text-transform: uppercase;
+            line-height: 1.25;
+            margin-bottom: 1px;
+          }
+          .divider-double {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            height: 3px;
+            margin: 6px auto;
+            width: 96%;
+          }
+          .reception-block {
+            text-align: center;
+            margin: 2px 0;
+          }
+          .reception-title {
+            font-size: 14.5px;
+            font-weight: 900 !important;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+          }
+          .reception-line {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 2px;
+          }
+          .reception-line b {
+            font-weight: 900 !important;
+          }
+          .object-section {
+            text-align: center;
+            margin: 2px 0;
+          }
+          .object-title {
+            font-size: 13px;
+            font-weight: 900 !important;
+            margin-bottom: 4px;
+          }
+          .barcode-wrapper {
+            text-align: center;
+            margin: 3px auto 4px auto;
+          }
+          .barcode-img {
+            max-width: 90%;
+            height: 38px;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+          }
+          .barcode-num {
+            font-family: Arial, "Helvetica Neue", monospace, sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-top: 2px;
+          }
+          .device-name {
+            font-size: 13.5px;
+            font-weight: 900 !important;
+            text-transform: uppercase;
+            margin: 4px 0 2px 0;
+          }
+          .info-row {
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 2px;
+          }
+          .divider-dashed {
+            border-top: 1.5px dashed #000;
+            margin: 8px 0 4px 0;
+            width: 100%;
+          }
+          .cut-space {
+            height: 6mm;
+          }
         </style>
       </head>
       <body>
@@ -348,134 +498,40 @@ export function generateRepairReceiptHtml(rep, settings = null) {
           </div>
         ` : ''}
 
-        <div class="text-center">
-          <div class="store-title">${cfg.storeName || 'COMMERCE PRO'}</div>
-          ${cfg.storeSubtitle ? `<div class="store-sub">${cfg.storeSubtitle}</div>` : ''}
-          ${cfg.storeAddress ? `<div class="store-contact">${cfg.storeAddress}</div>` : ''}
-          ${cfg.storeCity ? `<div class="store-contact">${cfg.storeCity}</div>` : ''}
-          ${cfg.storePhone ? `<div class="store-contact">Tél: ${cfg.storePhone}</div>` : ''}
-        </div>
-
-        <div class="divider-dashed"></div>
-
-        <div class="text-center">
-          <div class="doc-title">★ BON DE PRISE EN CHARGE SAV ★</div>
-          <div class="rep-num">N° : ${rep.numeroReparation}</div>
-          <div style="font-size: 11.5px; font-weight: 900;">Date de dépôt : ${dateStr}</div>
-        </div>
-
-        <div class="divider-dashed"></div>
-
-        <!-- Informations Client -->
         <div>
-          <div class="section-title">1. INFORMATIONS DU CLIENT</div>
-          <div class="info-row">
-            <span class="info-label">Nom :</span>
-            <span class="info-val">${(rep.clientNom || 'Client Comptoir').toUpperCase()}</span>
+          <div class="store-name">${storeName}</div>
+          <div class="store-sub">${storeSubtitle}</div>
+          <div class="store-contact">${storeAddress}</div>
+          <div class="store-contact">${phoneText}</div>
+        </div>
+
+        <div class="divider-double"></div>
+
+        <div class="reception-block">
+          <div class="reception-title">RECEPTION N°: ${repNum}</div>
+          <div class="reception-line">Date : ${dateStr}</div>
+          <div class="reception-line">Client : ${clientNom}</div>
+          <div class="reception-line">Tél : ${clientTel}</div>
+        </div>
+
+        <div class="divider-double"></div>
+
+        <div class="object-section">
+          <div class="object-title">Objet N° 1</div>
+          <div class="barcode-wrapper">
+            ${barcodeUrl ? `<img src="${barcodeUrl}" class="barcode-img" alt="${barcodeValue}" />` : ''}
+            <div class="barcode-num">${barcodeValue}</div>
           </div>
-          <div class="info-row">
-            <span class="info-label">Téléphone :</span>
-            <span class="info-val">${rep.clientTelephone || '-'}</span>
-          </div>
-          ${rep.clientAdresse ? `
-            <div class="info-row">
-              <span class="info-label">Adresse :</span>
-              <span class="info-val">${rep.clientAdresse}</span>
-            </div>
+          <div class="device-name">${appareilNom}</div>
+          <div class="info-row">Pannes : ${panneStr}</div>
+          <div class="info-row">Devis approximatif : ${devisStr}</div>
+          <div class="info-row">Versement : ${versementStr}</div>
+          ${(rep?.motDePasseAppareil && String(rep.motDePasseAppareil).trim()) ? `
+            <div class="info-row">Code / Schéma : ${String(rep.motDePasseAppareil).trim()}</div>
           ` : ''}
         </div>
 
         <div class="divider-dashed"></div>
-
-        <!-- Fiche Technique de l'Appareil -->
-        <div>
-          <div class="section-title">2. FICHE TECHNIQUE APPAREIL</div>
-          <div class="info-row">
-            <span class="info-label">Appareil :</span>
-            <span class="info-val">${rep.appareilType || 'Téléphone'} ${rep.marque || ''} ${rep.modele || ''}</span>
-          </div>
-          ${rep.numeroSerie ? `
-            <div class="info-row">
-              <span class="info-label">S/N ou IMEI :</span>
-              <span class="info-val font-mono">${rep.numeroSerie}</span>
-            </div>
-          ` : ''}
-          <div class="info-row">
-            <span class="info-label">Code / PIN / Schéma :</span>
-            <span class="info-val">${rep.motDePasseAppareil || 'Non verrouillé'}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Accessoires laissés :</span>
-            <span class="info-val">${rep.accessoires || 'Appareil seul'}</span>
-          </div>
-          ${rep.etatAppareil ? `
-            <div class="info-row">
-              <span class="info-label">État physique :</span>
-              <span class="info-val">${rep.etatAppareil}</span>
-            </div>
-          ` : ''}
-        </div>
-
-        <div class="divider-dashed"></div>
-
-        <!-- Panne et Diagnostic -->
-        <div>
-          <div class="section-title">3. PANNE & DIAGNOSTIC DÉCLARÉ</div>
-          <div class="box-text">
-            <b>Panne signalée :</b> ${rep.panneDeclaree || 'Diagnostic complet requis'}
-          </div>
-          ${rep.diagnostic ? `
-            <div class="box-text" style="margin-top: 2px;">
-              <b>Diagnostic atelier :</b> ${rep.diagnostic}
-            </div>
-          ` : ''}
-        </div>
-
-        <div class="divider-dashed"></div>
-
-        <!-- Devis et Acompte Financier -->
-        <div>
-          <div class="section-title">4. ESTIMATION FINANCIÈRE</div>
-          <table class="totals-table">
-            <tr>
-              <td>Estimation devis :</td>
-              <td style="text-align: right;">${formatCurrencyDz(devis)} DA</td>
-            </tr>
-            <tr>
-              <td>Acompte versé à la dépose :</td>
-              <td style="text-align: right;">${formatCurrencyDz(acompte)} DA</td>
-            </tr>
-            <tr style="border-top: 1.5px dashed #000;">
-              <td style="padding-top: 2px;">Reste estimé à payer :</td>
-              <td style="text-align: right; padding-top: 2px; font-size: 14px;">${formatCurrencyDz(reste)} DA</td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="divider-dashed"></div>
-
-        <div class="barcode-wrapper">
-          ${barcodeUrl ? `<img src="${barcodeUrl}" class="barcode-img" alt="${rep.numeroReparation}" />` : ''}
-          <div class="barcode-num">${rep.numeroReparation}</div>
-        </div>
-
-        <div class="clauses">
-          <b>CONDITIONS SAV :</b><br/>
-          • Reçu obligatoire pour la restitution de l'appareil.<br/>
-          • L'atelier décline toute responsabilité pour les données personnelles.<br/>
-          • Tout appareil non récupéré après 30 jours fera l'objet de frais de garde.
-        </div>
-
-        <div class="signature-box">
-          <div>
-            <div>Signature Client :</div>
-            <div class="sign-line"></div>
-          </div>
-          <div style="text-align: right;">
-            <div>Cachet Atelier :</div>
-            <div class="sign-line" style="margin-left: auto;"></div>
-          </div>
-        </div>
 
         <div class="cut-space"></div>
       </body>

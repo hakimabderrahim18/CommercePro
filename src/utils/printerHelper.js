@@ -218,11 +218,11 @@ const DEFAULT_SETTINGS = {
   receiptContentWidth: 70, // 70mm : largeur d'impression utile standard thermique (évite toute coupure à droite)
   storeLogo: '', // Image du Logo (Data URL base64)
   showReceiptLogo: true, // Afficher le logo sur les tickets & bons
-  storeName: 'COMMERCE PRO',
-  storeSubtitle: 'VENTE PIECE MOBILE',
-  storeAddress: "LAGARE A CÔTÉ DE L'ARRÊT DE BUS LA CITÉ (3)",
+  storeName: 'NOUNOU TELECOM',
+  storeSubtitle: 'VENTE PIECE MOBILE ET REPARATION',
+  storeAddress: "LAGARE A CÔTÉ DE L'ARRÊT DE BUS LA CITÉ(3)T",
   storeCity: 'TIARET',
-  storePhone: '0550793369/0550082685',
+  storePhone: '0550793369 / 0550082685',
   receiptFooter: 'Merci pour votre confiance ! À bientôt.',
   autoCut: true,
   silentPrint: true, // Impression directe sans pop-up par défaut pour caisse rapide
@@ -255,10 +255,10 @@ const STORAGE_KEY = 'commercepost_printer_settings';
 
 export function getStoreName(cfg = null) {
   const settings = cfg || getPrinterSettings();
-  if (settings && typeof settings.storeName === 'string' && settings.storeName.trim()) {
+  if (settings && typeof settings.storeName === 'string' && settings.storeName.trim() && settings.storeName.trim() !== 'COMMERCE PRO') {
     return settings.storeName.trim();
   }
-  return 'COMMERCE PRO';
+  return 'NOUNOU TELECOM';
 }
 
 export function getPrinterSettings() {
