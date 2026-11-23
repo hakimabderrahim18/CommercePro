@@ -127,7 +127,6 @@ export default function UsersManagementView() {
     setEditingUser(null);
     setModalError('');
     setShowPassword(false);
-    loadCaisses();
     setUserFormData({
       nom: '',
       username: '',
@@ -143,7 +142,6 @@ export default function UsersManagementView() {
     setEditingUser(u);
     setModalError('');
     setShowPassword(false);
-    loadCaisses();
     setUserFormData({
       nom: u.nom || '',
       username: u.username || '',
@@ -727,10 +725,12 @@ export default function UsersManagementView() {
             <input
               type="text"
               required
+              autoFocus
               data-allow-enter="true"
-              value={userFormData.nom}
+              value={userFormData.nom || ''}
               onChange={(e) => {
-                setUserFormData({ ...userFormData, nom: e.target.value });
+                const val = e.target.value;
+                setUserFormData(prev => ({ ...prev, nom: val }));
                 if (modalError) setModalError('');
               }}
               placeholder="Ex: Yacine Réparateur"
@@ -746,9 +746,10 @@ export default function UsersManagementView() {
               type="text"
               required
               data-allow-enter="true"
-              value={userFormData.username}
+              value={userFormData.username || ''}
               onChange={(e) => {
-                setUserFormData({ ...userFormData, username: e.target.value });
+                const val = e.target.value;
+                setUserFormData(prev => ({ ...prev, username: val }));
                 if (modalError) setModalError('');
               }}
               placeholder="Ex: yacine"
@@ -766,9 +767,10 @@ export default function UsersManagementView() {
                 type={showPassword ? 'text' : 'password'}
                 required={!editingUser}
                 data-allow-enter="true"
-                value={userFormData.password}
+                value={userFormData.password || ''}
                 onChange={(e) => {
-                  setUserFormData({ ...userFormData, password: e.target.value });
+                  const val = e.target.value;
+                  setUserFormData(prev => ({ ...prev, password: val }));
                   if (modalError) setModalError('');
                 }}
                 placeholder={editingUser ? '•••••••• (Inchangé)' : 'Mot de passe ou code PIN'}
@@ -790,8 +792,11 @@ export default function UsersManagementView() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Rôle</label>
               <select
-                value={userFormData.role}
-                onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                value={userFormData.role || 'VENDEUR'}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setUserFormData(prev => ({ ...prev, role: val }));
+                }}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-blue-500"
               >
                 <option value="VENDEUR">Vendeur / Caissier</option>
@@ -803,8 +808,11 @@ export default function UsersManagementView() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Caisse Assignée</label>
               <select
-                value={userFormData.caisse}
-                onChange={(e) => setUserFormData({ ...userFormData, caisse: e.target.value })}
+                value={userFormData.caisse || ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setUserFormData(prev => ({ ...prev, caisse: val }));
+                }}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-blue-500"
               >
                 {caisses.length === 0 && (
@@ -825,7 +833,10 @@ export default function UsersManagementView() {
               type="checkbox"
               id="user-actif"
               checked={!!userFormData.actif}
-              onChange={(e) => setUserFormData({ ...userFormData, actif: e.target.checked ? 1 : 0 })}
+              onChange={(e) => {
+                const checked = e.target.checked ? 1 : 0;
+                setUserFormData(prev => ({ ...prev, actif: checked }));
+              }}
               className="w-4 h-4 text-blue-600 rounded border-slate-300 cursor-pointer"
             />
             <label htmlFor="user-actif" className="text-xs font-bold text-slate-700 cursor-pointer">
@@ -881,10 +892,12 @@ export default function UsersManagementView() {
             <input
               type="text"
               required
+              autoFocus
               data-allow-enter="true"
-              value={caisseFormData.nom}
+              value={caisseFormData.nom || ''}
               onChange={(e) => {
-                setCaisseFormData({ ...caisseFormData, nom: e.target.value });
+                const val = e.target.value;
+                setCaisseFormData(prev => ({ ...prev, nom: val }));
                 if (caisseModalError) setCaisseModalError('');
               }}
               placeholder="Ex: Caisse Réparation 2"
@@ -897,8 +910,11 @@ export default function UsersManagementView() {
             <input
               type="text"
               data-allow-enter="true"
-              value={caisseFormData.code}
-              onChange={(e) => setCaisseFormData({ ...caisseFormData, code: e.target.value })}
+              value={caisseFormData.code || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCaisseFormData(prev => ({ ...prev, code: val }));
+              }}
               placeholder="Ex: CAISSE-SAV-2"
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-emerald-500 transition"
             />
@@ -910,8 +926,11 @@ export default function UsersManagementView() {
               type="number"
               min="0"
               data-allow-enter="true"
-              value={caisseFormData.soldeInitial}
-              onChange={(e) => setCaisseFormData({ ...caisseFormData, soldeInitial: Number(e.target.value) || 0 })}
+              value={caisseFormData.soldeInitial !== undefined ? caisseFormData.soldeInitial : 0}
+              onChange={(e) => {
+                const val = Number(e.target.value) || 0;
+                setCaisseFormData(prev => ({ ...prev, soldeInitial: val }));
+              }}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-emerald-500 transition"
             />
           </div>
@@ -961,9 +980,10 @@ export default function UsersManagementView() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Caisse Source (Débit)</label>
               <select
-                value={transferFormData.sourceCaisse}
+                value={transferFormData.sourceCaisse || ''}
                 onChange={(e) => {
-                  setTransferFormData({ ...transferFormData, sourceCaisse: e.target.value });
+                  const val = e.target.value;
+                  setTransferFormData(prev => ({ ...prev, sourceCaisse: val }));
                   if (transferModalError) setTransferModalError('');
                 }}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-indigo-500"
@@ -977,9 +997,10 @@ export default function UsersManagementView() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Caisse Destination (Crédit)</label>
               <select
-                value={transferFormData.destinationCaisse}
+                value={transferFormData.destinationCaisse || ''}
                 onChange={(e) => {
-                  setTransferFormData({ ...transferFormData, destinationCaisse: e.target.value });
+                  const val = e.target.value;
+                  setTransferFormData(prev => ({ ...prev, destinationCaisse: val }));
                   if (transferModalError) setTransferModalError('');
                 }}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-indigo-500"
@@ -999,10 +1020,12 @@ export default function UsersManagementView() {
               type="number"
               min="1"
               required
+              autoFocus
               data-allow-enter="true"
-              value={transferFormData.montant}
+              value={transferFormData.montant || ''}
               onChange={(e) => {
-                setTransferFormData({ ...transferFormData, montant: e.target.value });
+                const val = e.target.value;
+                setTransferFormData(prev => ({ ...prev, montant: val }));
                 if (transferModalError) setTransferModalError('');
               }}
               placeholder="Ex: 50000"
@@ -1015,8 +1038,11 @@ export default function UsersManagementView() {
             <input
               type="text"
               data-allow-enter="true"
-              value={transferFormData.motif}
-              onChange={(e) => setTransferFormData({ ...transferFormData, motif: e.target.value })}
+              value={transferFormData.motif || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                setTransferFormData(prev => ({ ...prev, motif: val }));
+              }}
               placeholder="Ex: Dépôt fin de journée vers Caisse Maison"
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-indigo-500"
             />

@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { X, CreditCard, Banknote, Landmark, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { api } from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import { printPaymentReceipt } from '../../utils/printerHelper';
 
 export default function InvoicePaymentModal({ isOpen, onClose, invoice, onPaymentSuccess }) {
   const { t, isRTL } = useLanguage();
+  const { currentUser } = useAuth();
   if (!isOpen || !invoice) return null;
 
   const montantResteDu = Number(invoice.montantReste || (invoice.totalTTC - invoice.montantPaye) || 0);
@@ -54,6 +57,24 @@ export default function InvoicePaymentModal({ isOpen, onClose, invoice, onPaymen
       });
 
       if (res.success) {
+        // Impression automatique du reçu de versement / règlement facture
+        await printPaymentReceipt({
+          type: 'CLIENT',
+          entity: {
+            nom: invoice.clientNom || invoice.client?.nom || 'Client Comptoir',
+            telephone: invoice.clientTelephone || invoice.client?.telephone || '',
+            adresse: invoice.clientAdresse || invoice.client?.adresse || ''
+          },
+          montant: val,
+          ancienSolde: montantResteDu,
+          nouveauSolde: Math.max(0, montantResteDu - val),
+          modeReglement: modePaiement,
+          motif: notes || `Règlement facture / bon ${invoice.numeroFacture}`,
+          reference: invoice.numeroFacture,
+          caisse: caisse || currentUser?.caisse || 'Caisse 1 (Magasin)',
+          currentUser
+        });
+
         if (onPaymentSuccess) onPaymentSuccess(res.data);
         onClose();
       } else {

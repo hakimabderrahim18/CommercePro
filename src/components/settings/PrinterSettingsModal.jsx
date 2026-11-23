@@ -24,10 +24,14 @@ import {
   Wrench,
   Boxes,
   ShoppingBag,
-  Layers
+  Layers,
+  Lock,
+  Unlock,
+  ShieldCheck
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   getPrinterSettings, 
   savePrinterSettings, 
@@ -41,7 +45,8 @@ import {
 
 export default function PrinterSettingsModal({ isOpen, onClose }) {
   const { currentColorId, changeThemeColor, colorsList } = useTheme();
-  const [activeTab, setActiveTab] = useState('printers'); // 'printers' | 'appearance'
+  const { isAuthLockEnabled, setAuthLock, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('printers'); // 'printers' | 'activity' | 'appearance' | 'security'
   const [printers, setPrinters] = useState([]);
   const [loadingPrinters, setLoadingPrinters] = useState(false);
   const [settings, setSettings] = useState(getPrinterSettings());
@@ -229,7 +234,20 @@ export default function PrinterSettingsModal({ isOpen, onClose }) {
             }`}
           >
             <Palette className="w-4 h-4" />
-            <span>Couleurs & Thème de l'Application</span>
+            <span>Couleurs & Thème</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('security')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+              activeTab === 'security'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Sécurité & Verrouillage</span>
           </button>
         </div>
 
@@ -1530,6 +1548,161 @@ export default function PrinterSettingsModal({ isOpen, onClose }) {
           </div>
         </div>
         </div>
+        )}
+
+        {/* Tab 4 : Sécurité & Verrouillage (Lock / Unlock Login) */}
+        {activeTab === 'security' && (
+          <div className="space-y-6 animate-in fade-in duration-150">
+            {/* Status Card */}
+            <div className={`p-5 rounded-2xl border transition-all ${
+              isAuthLockEnabled 
+                ? 'bg-blue-50/60 border-blue-200' 
+                : 'bg-emerald-50/60 border-emerald-200'
+            }`}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className={`p-3 rounded-2xl ${
+                    isAuthLockEnabled 
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                      : 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                  }`}>
+                    {isAuthLockEnabled ? <Lock className="w-6 h-6" /> : <Unlock className="w-6 h-6" />}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-base text-slate-900">
+                        {isAuthLockEnabled ? 'Verrouillage de Session Actif' : 'Accès Direct sans Mot de Passe'}
+                      </h3>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        isAuthLockEnabled
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-emerald-100 text-emerald-700'
+                      }`}>
+                        {isAuthLockEnabled ? 'Sécurisé' : 'Direct'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-1 max-w-lg leading-relaxed">
+                      {isAuthLockEnabled
+                        ? "L'application exige une sélection d'utilisateur et un mot de passe à chaque lancement pour protéger les caisses et les données."
+                        : "L'écran de connexion est désactivé. L'application démarre directement sur votre session sans demander de mot de passe."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Main Toggle Switch */}
+                <div className="flex flex-col items-end">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!isAuthLockEnabled}
+                      onChange={(e) => {
+                        const newLockState = !e.target.checked;
+                        setAuthLock(newLockState);
+                        setSaveStatus(
+                          newLockState 
+                            ? '🔒 Verrouillage activé : Mot de passe requis au démarrage.' 
+                            : '🔓 Accès direct activé : Connexion automatique sans mot de passe.'
+                        );
+                        setTimeout(() => setSaveStatus(null), 3500);
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                  <span className="text-[11px] font-bold text-slate-500 mt-1.5">
+                    {isAuthLockEnabled ? 'Verrouiller au démarrage' : 'Accès direct activé'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Options & Scenarios Explanation */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Option 1: Mode Sécurisé */}
+              <div 
+                onClick={() => {
+                  setAuthLock(true);
+                  setSaveStatus('🔒 Mode Sécurisé activé avec succès.');
+                  setTimeout(() => setSaveStatus(null), 3000);
+                }}
+                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                  isAuthLockEnabled
+                    ? 'border-blue-500 bg-white shadow-sm ring-2 ring-blue-500/10'
+                    : 'border-slate-200 bg-white hover:border-slate-300 opacity-75 hover:opacity-100'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-blue-100 text-blue-700 rounded-xl">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <span className="font-bold text-xs text-slate-800">Mode Sécurisé (Recommandé)</span>
+                  </div>
+                  {isAuthLockEnabled && (
+                    <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                  )}
+                </div>
+                <ul className="text-[11px] text-slate-600 space-y-1.5 list-disc list-inside">
+                  <li>Demande le mot de passe à chaque lancement</li>
+                  <li>Idéal pour plusieurs vendeurs ou caissiers</li>
+                  <li>Protection des rapports et marges financières</li>
+                </ul>
+              </div>
+
+              {/* Option 2: Mode Direct */}
+              <div 
+                onClick={() => {
+                  setAuthLock(false);
+                  setSaveStatus('🔓 Mode Direct sans mot de passe activé.');
+                  setTimeout(() => setSaveStatus(null), 3000);
+                }}
+                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                  !isAuthLockEnabled
+                    ? 'border-emerald-500 bg-white shadow-sm ring-2 ring-emerald-500/10'
+                    : 'border-slate-200 bg-white hover:border-slate-300 opacity-75 hover:opacity-100'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl">
+                      <Unlock className="w-4 h-4" />
+                    </div>
+                    <span className="font-bold text-xs text-slate-800">Mode Direct (Mono-poste)</span>
+                  </div>
+                  {!isAuthLockEnabled && (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  )}
+                </div>
+                <ul className="text-[11px] text-slate-600 space-y-1.5 list-disc list-inside">
+                  <li>Démarrage instantané directement sur la caisse</li>
+                  <li>Zéro mot de passe à taper à chaque ouverture</li>
+                  <li>Bascule rapide disponible dans la barre latérale</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Quick Actions & Logout */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2.5 text-slate-600">
+                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                <span>
+                  Vous pouvez aussi verrouiller ou déverrouiller à tout moment via le cadenas en bas de la barre latérale.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthLock(true);
+                  onClose();
+                  logout();
+                }}
+                className="w-full sm:w-auto px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl transition cursor-pointer shrink-0 flex items-center justify-center gap-2"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Verrouiller & Déconnecter</span>
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Global Save Button */}

@@ -26,12 +26,14 @@ import {
   Plus
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { printHtmlContent, exportHtmlToPdf, getPrinterSettings, generateSituationReceiptHtml } from '../../utils/printerHelper';
+import { useAuth } from '../../context/AuthContext';
+import { printHtmlContent, exportHtmlToPdf, getPrinterSettings, generateSituationReceiptHtml, printPaymentReceipt } from '../../utils/printerHelper';
 import EditPurchaseModal from '../purchases/EditPurchaseModal';
 import PurchaseDetailModal from '../purchases/PurchaseDetailModal';
 
 export default function SupplierLedgerModal({ isOpen, onClose, supplier, onPaymentRecorded, initialOpenPayment = false }) {
   const { t, isRTL } = useLanguage();
+  const { currentUser } = useAuth();
   const [currentSupplier, setCurrentSupplier] = useState(supplier);
   const [movements, setMovements] = useState([]);
   const [purchases, setPurchases] = useState([]);
@@ -236,8 +238,10 @@ export default function SupplierLedgerModal({ isOpen, onClose, supplier, onPayme
     try {
       setSubmitting(true);
       setError('');
+      const oldDebt = Number(currentSupplier?.soldeDette || supplier?.soldeDette || 0);
+
       const res = await api.supplier.recordPayment({
-        supplierId: supplier._id,
+        supplierId: supplier._id || supplier.id,
         montant: val,
         modePaiement,
         caisse,
@@ -252,6 +256,23 @@ export default function SupplierLedgerModal({ isOpen, onClose, supplier, onPayme
         setNotes('');
         await fetchSupplierDetails();
         if (onPaymentRecorded) onPaymentRecorded();
+
+        // Impression automatique du reçu de versement / règlement fournisseur
+        const updatedSupp = res.data || currentSupplier || supplier;
+        const newDebt = Math.max(0, oldDebt - val);
+
+        await printPaymentReceipt({
+          type: 'FOURNISSEUR',
+          entity: updatedSupp,
+          montant: val,
+          ancienSolde: oldDebt,
+          nouveauSolde: newDebt,
+          modeReglement: modePaiement,
+          motif: notes || `Règlement versement fournisseur (${reference || 'Sans réf'})`,
+          reference: reference || '',
+          caisse: caisse || currentUser?.caisse || 'Caisse 1 (Magasin)',
+          currentUser
+        });
       } else {
         setError(res.error || 'Erreur enregistrement versement fournisseur.');
       }

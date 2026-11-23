@@ -14,9 +14,25 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Reset maximized on open/close
+  // Reset maximized on open/close & auto-focus first input
   useEffect(() => {
-    if (!isOpen) setIsMaximized(false);
+    if (!isOpen) {
+      setIsMaximized(false);
+    } else {
+      const timer = setTimeout(() => {
+        const modalEl = document.querySelector('.modal-content');
+        if (modalEl) {
+          const firstInput = modalEl.querySelector('input:not([type="hidden"]):not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled])');
+          if (firstInput && typeof firstInput.focus === 'function') {
+            firstInput.focus();
+            if (typeof firstInput.select === 'function' && firstInput.type !== 'file') {
+              firstInput.select();
+            }
+          }
+        }
+      }, 60);
+      return () => clearTimeout(timer);
+    }
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -56,10 +72,12 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
       aria-modal="true"
       onKeyDownCapture={handleKeyDownCapture}
     >
-      <div 
-        className="fixed inset-0" 
-        onClick={closeOnBackdropClick ? onClose : undefined} 
-      />
+      {closeOnBackdropClick && (
+        <div 
+          className="fixed inset-0 -z-10" 
+          onClick={onClose} 
+        />
+      )}
       
       <div 
         style={!isMaximized ? { resize: 'both' } : {}}

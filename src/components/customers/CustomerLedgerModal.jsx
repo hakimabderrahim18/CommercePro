@@ -23,13 +23,15 @@ import {
   ShoppingBag,
   Clock
 } from 'lucide-react';
-import { printHtmlContent, exportHtmlToPdf, getPrinterSettings, generateSituationReceiptHtml } from '../../utils/printerHelper';
+import { printHtmlContent, exportHtmlToPdf, getPrinterSettings, generateSituationReceiptHtml, printPaymentReceipt } from '../../utils/printerHelper';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import EditInvoiceModal from '../invoices/EditInvoiceModal';
 import InvoiceDetailModal from '../invoices/InvoiceDetailModal';
 
 export default function CustomerLedgerModal({ isOpen, onClose, customer, onPaymentRecorded, initialOpenPayment = false }) {
   const { t } = useLanguage();
+  const { currentUser } = useAuth();
   const [movements, setMovements] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -219,6 +221,31 @@ export default function CustomerLedgerModal({ isOpen, onClose, customer, onPayme
     }
   };
 
+  const handlePrintMovementReceipt = async (m) => {
+    try {
+      const cust = currentCustomer || customer;
+      const mAmount = Number(m.montant || 0);
+      const mOld = Number(m.soldeAvant !== undefined ? m.soldeAvant : (Number(m.soldeApres || 0) + mAmount));
+      const mNew = Number(m.soldeApres !== undefined ? m.soldeApres : (mOld - mAmount));
+
+      await printPaymentReceipt({
+        type: 'CLIENT',
+        entity: cust,
+        montant: mAmount,
+        ancienSolde: mOld,
+        nouveauSolde: mNew,
+        modeReglement: m.modeReglement || 'ESPECES',
+        motif: m.motif || 'Règlement versement client',
+        reference: `VER-${m.id || m._id || ''}`,
+        date: m.createdAt || m.created_at,
+        caisse: currentUser?.caisse || 'Caisse 1 (Magasin)',
+        currentUser
+      });
+    } catch (err) {
+      console.error('Erreur réimpression reçu versement:', err);
+    }
+  };
+
   const handleRecordPayment = async (e) => {
     e.preventDefault();
     const amount = Number(paymentAmount);
@@ -231,8 +258,11 @@ export default function CustomerLedgerModal({ isOpen, onClose, customer, onPayme
       setSubmitting(true);
       setError('');
 
+      const cId = customer._id || customer.id;
+      const oldDebt = Number(currentCustomer?.soldeDette !== undefined ? currentCustomer.soldeDette : (customer.soldeDette || 0));
+
       const res = await api.customer.addPayment({
-        clientId: customer._id,
+        clientId: cId,
         montant: amount,
         modeReglement: paymentMode,
         motif: paymentMotif
@@ -243,6 +273,25 @@ export default function CustomerLedgerModal({ isOpen, onClose, customer, onPayme
         setPaymentAmount('');
         await fetchCustomerMovements();
         if (onPaymentRecorded) onPaymentRecorded();
+
+        // Impression automatique du reçu de versement / paiement
+        const updatedCust = res.data || currentCustomer || customer;
+        const newDebt = res.movement?.soldeApres !== undefined 
+          ? Number(res.movement.soldeApres) 
+          : Math.max(0, oldDebt - amount);
+
+        await printPaymentReceipt({
+          type: 'CLIENT',
+          entity: updatedCust,
+          montant: amount,
+          ancienSolde: res.movement?.soldeAvant !== undefined ? Number(res.movement.soldeAvant) : oldDebt,
+          nouveauSolde: newDebt,
+          modeReglement: paymentMode,
+          motif: paymentMotif,
+          reference: res.movement?.id ? `VER-${res.movement.id}` : '',
+          caisse: currentUser?.caisse || 'Caisse 1 (Magasin)',
+          currentUser
+        });
       } else {
         setError(res.error || 'Erreur lors de l’encaissement.');
       }
@@ -670,6 +719,16 @@ export default function CustomerLedgerModal({ isOpen, onClose, customer, onPayme
                             </td>
                             <td className="px-4 py-3 text-right">
                               <div className="flex items-center justify-end gap-1.5">
+                                {!isDebit && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePrintMovementReceipt(m)}
+                                    className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-100 transition cursor-pointer"
+                                    title="Imprimer le reçu de ce versement"
+                                  >
+                                    <Printer className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                                 <button
                                   type="button"
                                   onClick={() => handleOpenEditMovement(m)}

@@ -2051,3 +2051,203 @@ export function generateProductMovementHtml({
     </html>
   `;
 }
+
+/**
+ * Génère le document HTML imprimable pour un Reçu de Versement / Règlement (Thermique 80mm / 58mm)
+ */
+export function generatePaymentReceiptHtml({
+  type = 'CLIENT', // 'CLIENT' | 'FOURNISSEUR'
+  entity = {},     // { nom, telephone, adresse, ... }
+  montant = 0,
+  ancienSolde = 0,
+  nouveauSolde = 0,
+  modeReglement = 'ESPECES',
+  motif = '',
+  reference = '',
+  caisse = '',
+  currentUser = null,
+  date = null,
+  settings = null
+}) {
+  const cfg = settings || getPrinterSettings();
+  const cWidth = cfg.receiptContentWidth ? Math.min(Number(cfg.receiptContentWidth), 72) : 70;
+  const isClient = type === 'CLIENT';
+  
+  const now = date ? new Date(date) : new Date();
+  const dateFormatted = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+  const numRecu = reference || `REC-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+
+  const userNom = currentUser?.nom || currentUser?.username || 'Caissier';
+  const caisseNom = caisse || 'Caisse Principale';
+
+  const montantVersé = Number(montant || 0);
+  const oldSolde = Number(ancienSolde || 0);
+  const newSolde = Number(nouveauSolde || 0);
+
+  const modeLabels = {
+    'ESPECES': 'Espèces',
+    'VIREMENT': 'Virement / Mobile Money',
+    'CARTE': 'Carte Bancaire / CIB',
+    'CHEQUE': 'Chèque',
+    'AUTRE': 'Autre'
+  };
+  const modeStr = modeLabels[modeReglement] || modeReglement || 'Espèces';
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Reçu de Versement - ${entity?.nom || ''}</title>
+        <style>
+          @page { size: ${cfg.receiptPaperWidth === '58mm' ? '58mm' : '80mm'} auto; margin: 0; }
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body {
+            margin: 0; padding: 0; background: #fff; color: #000;
+            font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 12px; font-weight: 800; line-height: 1.25;
+          }
+          .container {
+            width: ${cWidth}mm; max-width: 100%; margin: 0 auto; padding: 3mm 1mm;
+          }
+          .divider { border-top: 1.5px dashed #000; margin: 4px 0; }
+          .double-divider { border-top: 2px solid #000; margin: 5px 0; }
+          .center { text-align: center; }
+          .title { font-size: 13.5px; font-weight: 900; text-transform: uppercase; margin: 3px 0; letter-spacing: 0.5px; }
+          .meta-row { display: flex; justify-content: space-between; font-size: 10.5px; margin: 1.5px 0; }
+          
+          .payment-box {
+            border: 2px solid #000;
+            border-radius: 4px;
+            padding: 6px 4px;
+            margin: 6px 0;
+            text-align: center;
+            background: #fff;
+          }
+          .payment-label { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+          .payment-amount { font-size: 20px; font-weight: 900; margin: 2px 0; color: #000; }
+
+          .balance-table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 11.5px; }
+          .balance-table td { padding: 2.5px 0; }
+          .text-right { text-align: right; }
+          .font-bold { font-weight: 900; }
+
+          .signature-zone {
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: 800;
+            padding-top: 4px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <!-- Entête Magasin -->
+          <div class="center">
+            <div style="font-size: 15px; font-weight: 900; text-transform: uppercase;">${getStoreName(cfg)}</div>
+            ${cfg.storePhone ? `<div style="font-size: 11px; font-weight: 800;">Tél : ${cfg.storePhone}</div>` : ''}
+            ${cfg.storeAddress ? `<div style="font-size: 10px;">${cfg.storeAddress}</div>` : ''}
+            <div class="divider"></div>
+            <div class="title">★ REÇU DE VERSEMENT ★</div>
+            <div style="font-size: 10px; font-weight: 800; font-family: monospace;">N° ${numRecu}</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Méta Informations -->
+          <div class="meta-row">
+            <span>Date & Heure :</span>
+            <span class="font-bold">${dateFormatted}</span>
+          </div>
+          <div class="meta-row">
+            <span>Opérateur / Caisse :</span>
+            <span class="font-bold">${userNom} (${caisseNom})</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Tiers (Client ou Fournisseur) -->
+          <div style="font-size: 12px; margin: 2px 0;">
+            <div>${isClient ? 'Client' : 'Fournisseur'} : <span style="font-size: 13px; font-weight: 900; text-transform: uppercase;">${entity?.nom || 'Client Comptoir'}</span></div>
+            ${entity?.telephone ? `<div style="font-size: 11px; margin-top: 1px;">Tél : ${entity.telephone}</div>` : ''}
+            ${entity?.adresse ? `<div style="font-size: 10px; color: #444;">Adresse : ${entity.adresse}</div>` : ''}
+          </div>
+
+          <!-- Encadré Principal : Montant Versé -->
+          <div class="payment-box">
+            <div class="payment-label">MONTANT VERSÉ (${modeStr.toUpperCase()})</div>
+            <div class="payment-amount">${formatCurrencyDz(montantVersé, cfg.receiptDecimals)} DA</div>
+            ${motif ? `<div style="font-size: 10.5px; font-style: italic; margin-top: 2px;">Motif : ${motif}</div>` : ''}
+          </div>
+
+          <!-- Récapitulatif Dette & Solde -->
+          <table class="balance-table">
+            <tbody>
+              <tr>
+                <td>Ancien Solde :</td>
+                <td class="text-right font-bold">${formatCurrencyDz(oldSolde, cfg.receiptDecimals)} DA</td>
+              </tr>
+              <tr>
+                <td>Versement Reçu :</td>
+                <td class="text-right font-bold" style="border-bottom: 1.5px solid #000; color: #000;">- ${formatCurrencyDz(montantVersé, cfg.receiptDecimals)} DA</td>
+              </tr>
+              <tr style="font-size: 13px;">
+                <td class="font-bold" style="padding-top: 4px;">NOUVEAU SOLDE :</td>
+                <td class="text-right font-bold" style="padding-top: 4px; ${newSolde > 0 ? '' : 'color: #15803d;'}">${formatCurrencyDz(newSolde, cfg.receiptDecimals)} DA</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="double-divider"></div>
+
+          <!-- Signature & Cachet -->
+          <div class="signature-zone">
+            <div style="text-align: left;">
+              <div>Signature Client :</div>
+              <div style="height: 9mm;"></div>
+            </div>
+            <div style="text-align: right;">
+              <div>Cachet Magasin :</div>
+              <div style="height: 9mm;"></div>
+            </div>
+          </div>
+
+          <!-- Pied de page -->
+          <div class="center" style="font-size: 10px; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #000;">
+            <div>${cfg.receiptFooterMsg || 'Merci pour votre confiance !'}</div>
+            <div style="font-size: 9px; color: #555; margin-top: 2px;">CommercePost • Logiciel de Gestion & Caisse</div>
+          </div>
+          <div style="height: 5mm;"></div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+/**
+ * Imprime un reçu de versement / règlement directement sur l'imprimante thermique configurée
+ */
+export async function printPaymentReceipt(paymentInfo, customSettings = null) {
+  try {
+    const settings = customSettings || getPrinterSettings();
+    const html = generatePaymentReceiptHtml({
+      ...paymentInfo,
+      settings
+    });
+    const paperWidth = settings.receiptPaperWidth === '58mm' ? 58 : 80;
+    return await printHtmlContent(html, {
+      printerName: settings.receiptPrinter,
+      pageSize: { width: paperWidth * 1000, height: 297000 },
+      landscape: settings.receiptOrientation === 'landscape',
+      silent: true,
+      margins: { marginType: 'none' }
+    });
+  } catch (err) {
+    console.error('Erreur impression reçu de versement:', err);
+    return { success: false, error: err.message };
+  }
+}
+

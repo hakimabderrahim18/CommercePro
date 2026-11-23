@@ -17,6 +17,8 @@ import {
   TrendingDown,
   Wrench,
   ShieldCheck,
+  Lock,
+  Unlock,
   LogOut,
   UserCheck,
   PanelLeftClose,
@@ -38,7 +40,7 @@ export default function Sidebar({
   hasUpdate = false
 }) {
   const { t } = useLanguage();
-  const { currentUser, logout, isAdmin, isReparateur, isVendeur } = useAuth();
+  const { currentUser, logout, isAuthLockEnabled, setAuthLock, isAdmin, isReparateur, isVendeur } = useAuth();
 
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem('commercepost_sidebar_collapsed');
@@ -232,14 +234,29 @@ export default function Sidebar({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={logout}
-              className="p-1 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition cursor-pointer shrink-0"
-              title="Déconnexion"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setAuthLock(!isAuthLockEnabled)}
+                className={`p-1 rounded-md transition cursor-pointer ${
+                  isAuthLockEnabled 
+                    ? 'text-blue-400 hover:text-blue-300 hover:bg-blue-500/10' 
+                    : 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10'
+                }`}
+                title={isAuthLockEnabled ? "Verrouillage de session activé (Cliquer pour désactiver et passer en accès direct)" : "Verrouillage désactivé (Accès direct sans mot de passe activé)"}
+              >
+                {isAuthLockEnabled ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={logout}
+                className="p-1 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition cursor-pointer"
+                title="Déconnexion (Verrouiller et fermer la session)"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -127,7 +127,7 @@ async function createWindow() {
       spellcheck: false
     },
     show: true,
-    backgroundColor: '#0f172a'
+    backgroundColor: '#f8fafc'
   });
 
   setupIPC(mainWindow);
