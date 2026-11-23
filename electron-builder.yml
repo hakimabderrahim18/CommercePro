@@ -24,4 +24,5 @@ win:
   icon: assets/icon.ico
   target:
     - target: dir
+    - target: zip
   signAndEditExecutable: false
