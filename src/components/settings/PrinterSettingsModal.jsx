@@ -45,7 +45,7 @@ import {
 
 export default function PrinterSettingsModal({ isOpen, onClose }) {
   const { currentColorId, changeThemeColor, colorsList } = useTheme();
-  const { isAuthLockEnabled, setAuthLock, logout } = useAuth();
+  const { isAuthLockEnabled, setAuthLock, showDirectAccessButton, setShowDirectAccessButton, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('printers'); // 'printers' | 'activity' | 'appearance' | 'security'
   const [printers, setPrinters] = useState([]);
   const [loadingPrinters, setLoadingPrinters] = useState(false);
@@ -1679,6 +1679,38 @@ export default function PrinterSettingsModal({ isOpen, onClose }) {
                   <li>Bascule rapide disponible dans la barre latérale</li>
                 </ul>
               </div>
+            </div>
+
+            {/* Option dédiée : Faire apparaître le bouton sur l'écran de connexion */}
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl ${showDirectAccessButton ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                  <Unlock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-slate-900">
+                    Bouton d'Accès Direct sur l'Écran de Connexion
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Activez cette option pour faire apparaître le bouton « Accès Direct sans mot de passe » sur la page de connexion.
+                  </p>
+                </div>
+              </div>
+
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={showDirectAccessButton}
+                  onChange={(e) => {
+                    const val = e.target.checked;
+                    setShowDirectAccessButton(val);
+                    setSaveStatus(val ? '✅ Bouton d’accès direct activé sur l’écran de connexion.' : '🔒 Bouton d’accès direct masqué.');
+                    setTimeout(() => setSaveStatus(null), 3500);
+                  }}
+                  className="sr-only peer"
+                />
+                <div className="w-12 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
             </div>
 
             {/* Quick Actions & Logout */}

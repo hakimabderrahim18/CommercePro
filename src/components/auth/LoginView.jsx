@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { 
   ShieldCheck, 
   Lock, 
+  Unlock,
   User, 
   ArrowRight, 
   AlertCircle,
@@ -11,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export default function LoginView({ licenseInfo }) {
-  const { login, loading } = useAuth();
+  const { login, bypassLogin, showDirectAccessButton, loading } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -145,6 +146,21 @@ export default function LoginView({ licenseInfo }) {
               <span>{loading ? 'Vérification en cours...' : 'Se connecter'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+
+            {/* Bouton conditionnel : apparaît uniquement quand la fonction est activée */}
+            {showDirectAccessButton && (
+              <div className="pt-2 text-center animate-in fade-in duration-200">
+                <button
+                  type="button"
+                  onClick={bypassLogin}
+                  className="w-full py-2.5 px-3 rounded-xl border border-slate-700/60 bg-slate-800/40 hover:bg-slate-800 text-slate-300 hover:text-emerald-400 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                  title="Désactiver le verrouillage et entrer directement sans mot de passe"
+                >
+                  <Unlock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Accès Direct sans mot de passe (Désactiver verrouillage)</span>
+                </button>
+              </div>
+            )}
           </form>
 
           <div className="mt-6 pt-4 border-t border-slate-800/80 text-center flex flex-col items-center gap-2">

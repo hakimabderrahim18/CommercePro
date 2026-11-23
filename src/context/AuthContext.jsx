@@ -14,6 +14,20 @@ export function AuthProvider({ children }) {
     }
   });
 
+  // Affichage du bouton "Accès direct" sur l'écran de connexion (activable depuis les paramètres)
+  const [showDirectAccessButton, setShowDirectAccessButtonState] = useState(() => {
+    try {
+      return localStorage.getItem('commercepost_show_direct_access_btn') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const setShowDirectAccessButton = (show) => {
+    setShowDirectAccessButtonState(show);
+    localStorage.setItem('commercepost_show_direct_access_btn', String(show));
+  };
+
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const lockEnabled = localStorage.getItem('commercepost_auth_lock_enabled') !== 'false';
@@ -138,6 +152,8 @@ export function AuthProvider({ children }) {
       setCurrentUser,
       isAuthLockEnabled,
       setAuthLock,
+      showDirectAccessButton,
+      setShowDirectAccessButton,
       bypassLogin,
       autoLoginDefaultUser,
       login,
