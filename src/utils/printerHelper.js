@@ -248,7 +248,30 @@ const DEFAULT_SETTINGS = {
   receiptShowCustomerAddress: true,
   receiptShowBarcode: true,
   receiptShowDate: true,
-  receiptShowCashier: true
+  receiptShowCashier: true,
+
+  // Attributs et personnalisation complète de l'impression Réparation (SAV)
+  repairReceptionTitle: '★ BON DE RÉCEPTION SAV ★',
+  repairEstimateTitle: '★ DEVIS ESTIMATIF RÉPARATION ★',
+  repairDeliveryTitle: '★ BON DE LIVRAISON & RESTITUTION SAV ★',
+  repairWorkshopTitle: 'FICHE TECHNIQUE ATELIER',
+  repairWarrantyText: 'Garantie de 30 jours sur les pièces remplacées. Appareil testé et remis en parfait état de marche.',
+  repairEstimateText: "Ce devis est valable 15 jours. L'accord du client est obligatoire avant intervention.",
+  repairReceptionNotes: "Veuillez présenter ce bon pour la restitution. Tout appareil non réclamé après 30 jours ne sera plus sous la responsabilité de l'atelier.",
+  repairShowLogo: true,
+  repairShowStoreHeader: true,
+  repairShowBarcode: true,
+  repairShowTechnician: true,
+  repairShowDeviceType: true,
+  repairShowIssue: true,
+  repairShowCodePattern: true,
+  repairShowPartsTable: true,
+  repairShowEstimate: true,
+  repairShowAcompte: true,
+  repairShowSoldeDette: true,
+  repairShowSignatures: true,
+  repairShowWarranty: true,
+  repairShowConditions: true
 };
 
 const STORAGE_KEY = 'commercepost_printer_settings';

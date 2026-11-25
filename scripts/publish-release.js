@@ -17,17 +17,20 @@ function getGithubToken() {
 const GITHUB_TOKEN = getGithubToken();
 const OWNER = 'hakimabderrahim18';
 const REPO = 'CommercePro';
-const TAG = 'v1.0.2';
-const NAME = 'Commerce Pro v1.0.2';
-const BODY = `## Commerce Pro v1.0.2 - Mise à jour officielle
+const TAG = 'v1.0.3';
+const NAME = 'Commerce Pro v1.0.3';
+const BODY = `## Commerce Pro v1.0.3 - Mise à jour officielle
 
-### Nouveautés & Corrections :
-- **Cadrage parfait à l'impression thermique (SPRT 80mm / POS-80) :**
-  - Élimination des coupures de texte sur la droite (Devis SAV, Bons de restitution & livraison, Tickets de caisse, Reçus de versement).
-  - Plus de coupure de "DA", des numéros de téléphone ou des noms de clients.
-  - Calcul dynamique de la hauteur pour les longs tickets.
-- **Performances ultra rapides :**
-  - Changement d'onglet et de fenêtre instantané (0 ms) sans rechargement excessif de la base de données.
+### Nouveautés & Améliorations :
+- **Attributs d'impression SAV & Réparation 100% configurables et personnalisables :**
+  - Nouvel onglet dédié « Impression SAV & Réparation » dans les paramètres.
+  - Personnalisation de tous les titres de documents : Bon de Réception, Devis Estimatif, Bon de Restitution & Livraison SAV, Fiche d'Atelier Interne.
+  - Toggles (cases à cocher) pour afficher ou masquer chaque élément : Logo, Coordonnées Magasin, Code-Barres, Technicien SAV, Appareil & IMEI, Panne & Diagnostic, Code/Schéma PIN, Tableau des Pièces & Main d'œuvre, Devis estimatif, Acompte, Reste à Payer (Dette), Cadres de signatures, Bloc de garantie, Mentions & avertissements.
+  - Textes libres et modifiables pour les clauses de garantie, validité du devis et conditions de prise en charge.
+- **Impression thermique optimisée (SPRT 80 / POS-80) :**
+  - Zéro coupure de texte à droite, format 68mm sécurisé avec marge de découpe.
+- **Fluidité & Vitesse Maximale :**
+  - Navigation et changement d'écrans instantané (0 ms).
 `;
 
 function request(options, data) {

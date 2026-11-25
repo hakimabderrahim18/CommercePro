@@ -46,7 +46,7 @@ import {
 export default function PrinterSettingsModal({ isOpen, onClose }) {
   const { currentColorId, changeThemeColor, colorsList } = useTheme();
   const { isAuthLockEnabled, setAuthLock, showDirectAccessButton, setShowDirectAccessButton, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('printers'); // 'printers' | 'activity' | 'appearance' | 'security'
+  const [activeTab, setActiveTab] = useState('printers'); // 'printers' | 'repair_print' | 'activity' | 'appearance' | 'security'
   const [printers, setPrinters] = useState([]);
   const [loadingPrinters, setLoadingPrinters] = useState(false);
   const [settings, setSettings] = useState(getPrinterSettings());
@@ -193,41 +193,54 @@ export default function PrinterSettingsModal({ isOpen, onClose }) {
       isOpen={isOpen}
       onClose={onClose}
       title="Paramètres de l'Application & Matériel"
-      maxWidth="max-w-3xl"
+      maxWidth="max-w-4xl"
     >
       <div className="space-y-6 text-slate-800">
-        {/* Navigation Tabs : Matériel d'Impression vs Couleurs & Thème */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-200 pb-2">
           <button
             type="button"
             onClick={() => setActiveTab('printers')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
               activeTab === 'printers'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <Printer className="w-4 h-4" />
-            <span>Matériel d'Impression & Magasin</span>
+            <span>Matériel & Caisse</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('repair_print')}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+              activeTab === 'repair_print'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <Wrench className="w-4 h-4" />
+            <span>Impression SAV & Réparation</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('activity')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
               activeTab === 'activity'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <Briefcase className="w-4 h-4" />
-            <span>Activité, Métier & SAV</span>
+            <span>Activité & Métier</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('appearance')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
               activeTab === 'appearance'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -240,7 +253,7 @@ export default function PrinterSettingsModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={() => setActiveTab('security')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
               activeTab === 'security'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -265,6 +278,253 @@ export default function PrinterSettingsModal({ isOpen, onClose }) {
             >
               ✕
             </button>
+          </div>
+        )}
+
+        {/* Tab : Impression SAV & Réparation (Tous attributs, titres et textes configurables) */}
+        {activeTab === 'repair_print' && (
+          <div className="space-y-5 animate-in fade-in duration-150">
+            {/* Header info */}
+            <div className="bg-blue-50/70 border border-blue-200 p-4 rounded-2xl flex items-start gap-3">
+              <div className="p-2 bg-blue-600 text-white rounded-xl shrink-0 mt-0.5">
+                <Wrench className="w-4 h-4" />
+              </div>
+              <div className="text-xs">
+                <h4 className="font-black text-slate-900 text-sm">
+                  Personnalisation Complète des Impressions SAV & Atelier
+                </h4>
+                <p className="text-slate-600 mt-1 leading-relaxed">
+                  Tous les documents de réparation (Bon de Réception, Devis Estimatif, Bon de Restitution/Livraison et Fiche Atelier) sont 100% configurables ici. Modifiez les titres, cochez les éléments à afficher ou masquer, et adaptez vos mentions légales de garantie.
+                </p>
+              </div>
+            </div>
+
+            {/* SECTION 1 : TITRES PERSONNALISABLES DES DOCUMENTS */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">
+                    Titres Personnalisables des Documents SAV
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Modifiez le grand titre imprimé en tête de chaque type de document de réparation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Titre Bon de Réception (Prise en charge) :
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.repairReceptionTitle ?? '★ BON DE RÉCEPTION SAV ★'}
+                    onChange={(e) => {
+                      const updated = { ...settings, repairReceptionTitle: e.target.value };
+                      setSettings(updated);
+                      savePrinterSettings(updated);
+                    }}
+                    placeholder="Ex: ★ BON DE RÉCEPTION SAV ★"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:outline-blue-500"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Imprimé lors du dépôt de l'appareil par le client.</p>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Titre Devis Estimatif :
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.repairEstimateTitle ?? '★ DEVIS ESTIMATIF RÉPARATION ★'}
+                    onChange={(e) => {
+                      const updated = { ...settings, repairEstimateTitle: e.target.value };
+                      setSettings(updated);
+                      savePrinterSettings(updated);
+                    }}
+                    placeholder="Ex: ★ DEVIS ESTIMATIF RÉPARATION ★"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:outline-blue-500"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Imprimé avant réparation pour validation du coût.</p>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Titre Bon de Restitution & Livraison :
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.repairDeliveryTitle ?? '★ BON DE LIVRAISON & RESTITUTION SAV ★'}
+                    onChange={(e) => {
+                      const updated = { ...settings, repairDeliveryTitle: e.target.value };
+                      setSettings(updated);
+                      savePrinterSettings(updated);
+                    }}
+                    placeholder="Ex: ★ BON DE LIVRAISON & RESTITUTION SAV ★"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:outline-blue-500"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Facture / Bon remis lors du retrait de l'appareil.</p>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Titre Fiche d'Atelier (Interne A4) :
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.repairWorkshopTitle ?? 'FICHE TECHNIQUE ATELIER'}
+                    onChange={(e) => {
+                      const updated = { ...settings, repairWorkshopTitle: e.target.value };
+                      setSettings(updated);
+                      savePrinterSettings(updated);
+                    }}
+                    placeholder="Ex: FICHE TECHNIQUE ATELIER"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:outline-blue-500"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Fiche de suivi interne pour le technicien.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 2 : VISIBILITÉ DES BLOCS & ÉLÉMENTS SUR LES TICKETS */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <Sliders className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">
+                    Attributs & Blocs à Imprimer (Afficher / Masquer)
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Cochez ou décochez les données à inclure sur les tickets thermiques de réparation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                {[
+                  { key: 'repairShowLogo', label: 'Logo du Magasin / Atelier', desc: 'Affiche le logo en tête de ticket' },
+                  { key: 'repairShowStoreHeader', label: 'Coordonnées du Magasin', desc: 'Nom, adresse, ville et téléphones' },
+                  { key: 'repairShowBarcode', label: 'Code-Barres Scannable', desc: 'Code scannable pour recherche directe' },
+                  { key: 'repairShowTechnician', label: 'Nom du Technicien SAV', desc: 'Réparateur affecté au dossier' },
+                  { key: 'repairShowDeviceType', label: 'Détails Appareil & IMEI', desc: 'Marque, modèle et numéro de série' },
+                  { key: 'repairShowIssue', label: 'Panne Déclarée & Diagnostic', desc: 'Constat initial de la panne' },
+                  { key: 'repairShowCodePattern', label: 'Code PIN & Schéma de Sécurité', desc: 'Code de déverrouillage de l’appareil' },
+                  { key: 'repairShowPartsTable', label: 'Tableau des Pièces Détachées', desc: 'Détail des pièces posées et MO' },
+                  { key: 'repairShowEstimate', label: 'Devis Estimatif Approximatif', desc: 'Estimation initiale sur le bon d’entrée' },
+                  { key: 'repairShowAcompte', label: 'Acompte & Versement Réglé', desc: 'Montant versé d’avance par le client' },
+                  { key: 'repairShowSoldeDette', label: 'Reste à Payer (Dette/Crédit)', desc: 'Solde restant dû après versement' },
+                  { key: 'repairShowSignatures', label: 'Cadres de Signatures', desc: 'Signature Client et Cachet Atelier' },
+                  { key: 'repairShowWarranty', label: 'Bloc de Garantie SAV', desc: 'Mention de garantie sur pièces et main d’œuvre' },
+                  { key: 'repairShowConditions', label: 'Conditions & Avertissements', desc: 'Délais de garde et validité du devis' }
+                ].map((item) => {
+                  const isChecked = settings[item.key] !== false;
+                  return (
+                    <label
+                      key={item.key}
+                      className={`flex items-start gap-3 p-3 rounded-xl border transition cursor-pointer select-none ${
+                        isChecked 
+                          ? 'bg-blue-50/50 border-blue-200' 
+                          : 'bg-slate-50 border-slate-200 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const updated = { ...settings, [item.key]: e.target.checked };
+                          setSettings(updated);
+                          savePrinterSettings(updated);
+                        }}
+                        className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 mt-0.5 shrink-0"
+                      />
+                      <div className="flex-1">
+                        <span className="font-bold text-slate-900 block leading-tight">{item.label}</span>
+                        <span className="text-[11px] text-slate-500 block mt-0.5">{item.desc}</span>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* SECTION 3 : TEXTES LÉGAUX, CLAUSES & CONDITIONS MODIFIABLES */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">
+                    Mentions Légales, Garantie & Conditions Modifiables
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Modifiez librement les textes imprimés au bas de vos tickets de réparation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Texte de Garantie SAV (Bon de Restitution / Livraison) :
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={settings.repairWarrantyText ?? 'Garantie de 30 jours sur les pièces remplacées. Appareil testé et remis en parfait état de marche.'}
+                    onChange={(e) => {
+                      const updated = { ...settings, repairWarrantyText: e.target.value };
+                      setSettings(updated);
+                      savePrinterSettings(updated);
+                    }}
+                    placeholder="Ex: Garantie de 30 jours sur les pièces remplacées. Appareil testé et remis en parfait état de marche."
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:bg-white focus:outline-blue-500 leading-relaxed"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Imprimé en bas du Bon de Restitution lors de la remise de l'appareil au client.</p>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Conditions et Validité du Devis Estimatif :
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={settings.repairEstimateText ?? "Ce devis est valable 15 jours. L'accord du client est obligatoire avant intervention."}
+                    onChange={(e) => {
+                      const updated = { ...settings, repairEstimateText: e.target.value };
+                      setSettings(updated);
+                      savePrinterSettings(updated);
+                    }}
+                    placeholder="Ex: Ce devis est valable 15 jours. L'accord du client est obligatoire avant intervention."
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:bg-white focus:outline-blue-500 leading-relaxed"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Imprimé en bas du Devis Estimatif pour clarifier la durée de validité des tarifs.</p>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Clauses & Avertissements du Bon de Réception (Entrée Atelier) :
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={settings.repairReceptionNotes ?? "Veuillez présenter ce bon pour la restitution. Tout appareil non réclamé après 30 jours ne sera plus sous la responsabilité de l'atelier."}
+                    onChange={(e) => {
+                      const updated = { ...settings, repairReceptionNotes: e.target.value };
+                      setSettings(updated);
+                      savePrinterSettings(updated);
+                    }}
+                    placeholder="Ex: Veuillez présenter ce bon pour la restitution. Tout appareil non réclamé après 30 jours ne sera plus sous la responsabilité de l'atelier."
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:bg-white focus:outline-blue-500 leading-relaxed"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Imprimé en bas du Bon de Prise en charge remis au client lors du dépôt.</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

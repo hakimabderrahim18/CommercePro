@@ -359,6 +359,7 @@ export function generateRepairReceiptHtml(rep, settings = null) {
   const is58 = cfg.receiptPaperWidth === '58mm';
   const cWidth = is58 ? 48 : Math.min(Number(cfg.receiptContentWidth) || 68, 70);
   const mLeft = cfg.receiptMarginLeft !== undefined ? cfg.receiptMarginLeft : 0;
+  const docTitle = cfg.repairReceptionTitle || `RECEPTION N°: ${repNum}`;
 
   return `
     <!DOCTYPE html>
@@ -498,44 +499,82 @@ export function generateRepairReceiptHtml(rep, settings = null) {
         </style>
       </head>
       <body>
-        ${(cfg.showReceiptLogo && cfg.storeLogo) ? `
+        ${(cfg.repairShowLogo !== false && cfg.showReceiptLogo && cfg.storeLogo) ? `
           <div class="logo-wrapper">
             <img src="${cfg.storeLogo}" alt="Logo" class="store-logo-img" />
           </div>
         ` : ''}
 
-        <div>
-          <div class="store-name">${storeName}</div>
-          <div class="store-sub">${storeSubtitle}</div>
-          <div class="store-contact">${storeAddress}</div>
-          <div class="store-contact">${phoneText}</div>
-        </div>
-
-        <div class="divider-double"></div>
+        ${cfg.repairShowStoreHeader !== false ? `
+          <div>
+            <div class="store-name">${storeName}</div>
+            <div class="store-sub">${storeSubtitle}</div>
+            <div class="store-contact">${storeAddress}</div>
+            <div class="store-contact">${phoneText}</div>
+          </div>
+          <div class="divider-double"></div>
+        ` : ''}
 
         <div class="reception-block">
-          <div class="reception-title">RECEPTION N°: ${repNum}</div>
+          <div class="reception-title">${docTitle}</div>
+          ${docTitle !== `RECEPTION N°: ${repNum}` ? `<div class="reception-line">N° : <b>${repNum}</b></div>` : ''}
           <div class="reception-line">Date : ${dateStr}</div>
           <div class="reception-line">Client : ${clientNom}</div>
           <div class="reception-line">Tél : ${clientTel}</div>
+          ${(cfg.repairShowTechnician !== false && (rep?.reparateurNom || rep?.technicien)) ? `
+            <div class="reception-line">Technicien : ${(rep.reparateurNom || rep.technicien).toUpperCase()}</div>
+          ` : ''}
         </div>
 
         <div class="divider-double"></div>
 
         <div class="object-section">
           <div class="object-title">Objet N° 1</div>
-          <div class="barcode-wrapper">
-            ${barcodeUrl ? `<img src="${barcodeUrl}" class="barcode-img" alt="${barcodeValue}" />` : ''}
-            <div class="barcode-num">${barcodeValue}</div>
-          </div>
-          <div class="device-name">${appareilNom}</div>
-          <div class="info-row">Pannes : ${panneStr}</div>
-          <div class="info-row">Devis approximatif : ${devisStr}</div>
-          <div class="info-row">Versement : ${versementStr}</div>
-          ${(rep?.motDePasseAppareil && String(rep.motDePasseAppareil).trim()) ? `
+          ${(cfg.repairShowBarcode !== false && barcodeUrl) ? `
+            <div class="barcode-wrapper">
+              <img src="${barcodeUrl}" class="barcode-img" alt="${barcodeValue}" />
+              <div class="barcode-num">${barcodeValue}</div>
+            </div>
+          ` : ''}
+          ${cfg.repairShowDeviceType !== false ? `
+            <div class="device-name">${appareilNom}</div>
+          ` : ''}
+          ${(rep?.numeroSerie && cfg.repairShowDeviceType !== false) ? `
+            <div class="info-row">N° Série / IMEI : ${rep.numeroSerie}</div>
+          ` : ''}
+          ${cfg.repairShowIssue !== false ? `
+            <div class="info-row">Pannes : ${panneStr}</div>
+          ` : ''}
+          ${cfg.repairShowEstimate !== false ? `
+            <div class="info-row">Devis approximatif : ${devisStr}</div>
+          ` : ''}
+          ${cfg.repairShowAcompte !== false ? `
+            <div class="info-row">Versement : ${versementStr}</div>
+          ` : ''}
+          ${(cfg.repairShowCodePattern !== false && rep?.motDePasseAppareil && String(rep.motDePasseAppareil).trim()) ? `
             <div class="info-row">Code / Schéma : ${String(rep.motDePasseAppareil).trim()}</div>
           ` : ''}
         </div>
+
+        ${(cfg.repairShowConditions !== false && cfg.repairReceptionNotes) ? `
+          <div class="divider-dashed"></div>
+          <div style="font-size: 10px; font-weight: 700; text-align: center; line-height: 1.25; margin-top: 4px;">
+            ${cfg.repairReceptionNotes.replace(/\n/g, '<br/>')}
+          </div>
+        ` : ''}
+
+        ${cfg.repairShowSignatures !== false ? `
+          <div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 10px; font-weight: 800;">
+            <div style="width: 48%; text-align: left;">
+              <div>Signature Client :</div>
+              <div style="height: 25px; border-bottom: 1px solid #000; margin-top: 2px;"></div>
+            </div>
+            <div style="width: 48%; text-align: right;">
+              <div>Cachet Atelier :</div>
+              <div style="height: 25px; border-bottom: 1px solid #000; margin-top: 2px;"></div>
+            </div>
+          </div>
+        ` : ''}
 
         <div class="divider-dashed"></div>
 
@@ -599,7 +638,9 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
   const montantPaye = Number(rep.montantPaye || netAPayer);
   const soldeRestant = Number(rep.montantReste ?? Math.max(0, totalTTC - acompte - montantPaye));
 
-  const docTitle = isReturn ? 'BON DE RETOUR SAV (AVOIR)' : 'BON DE LIVRAISON & RESTITUTION SAV';
+  const docTitle = isReturn 
+    ? 'BON DE RETOUR SAV (AVOIR)' 
+    : (cfg.repairDeliveryTitle || 'BON DE LIVRAISON & RESTITUTION SAV');
 
   const is58 = cfg.receiptPaperWidth === '58mm';
   const cWidth = is58 ? 48 : Math.min(Number(cfg.receiptContentWidth) || 68, 70);
@@ -654,24 +695,25 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
         </style>
       </head>
       <body>
-        ${(cfg.showReceiptLogo && cfg.storeLogo) ? `
+        ${(cfg.repairShowLogo !== false && cfg.showReceiptLogo && cfg.storeLogo) ? `
           <div class="logo-wrapper">
             <img src="${cfg.storeLogo}" alt="Logo" class="store-logo-img" />
           </div>
         ` : ''}
 
-        <div class="text-center">
-          <div class="store-title">${cfg.storeName || 'COMMERCE PRO'}</div>
-          ${cfg.storeSubtitle ? `<div class="store-sub">${cfg.storeSubtitle}</div>` : ''}
-          ${cfg.storeAddress ? `<div class="store-contact">${cfg.storeAddress}</div>` : ''}
-          ${cfg.storeCity ? `<div class="store-contact">${cfg.storeCity}</div>` : ''}
-          ${cfg.storePhone ? `<div class="store-contact">Tél: ${cfg.storePhone}</div>` : ''}
-        </div>
+        ${cfg.repairShowStoreHeader !== false ? `
+          <div class="text-center">
+            <div class="store-title">${cfg.storeName || 'COMMERCE PRO'}</div>
+            ${cfg.storeSubtitle ? `<div class="store-sub">${cfg.storeSubtitle}</div>` : ''}
+            ${cfg.storeAddress ? `<div class="store-contact">${cfg.storeAddress}</div>` : ''}
+            ${cfg.storeCity ? `<div class="store-contact">${cfg.storeCity}</div>` : ''}
+            ${cfg.storePhone ? `<div class="store-contact">Tél: ${cfg.storePhone}</div>` : ''}
+          </div>
+          <div class="divider-dashed"></div>
+        ` : ''}
 
-        <div class="divider-dashed"></div>
-
         <div class="text-center">
-          <div class="doc-title">★ ${docTitle} ★</div>
+          <div class="doc-title">${docTitle}</div>
           <div class="rep-num">N° : ${rep.numeroReparation}</div>
           <div style="font-size: 11.5px; font-weight: 900;">Date de restitution : ${dateStr}</div>
         </div>
@@ -687,42 +729,53 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
             <span class="info-label">Téléphone :</span>
             <span class="info-val">${rep.clientTelephone || '-'}</span>
           </div>
-          <div class="info-row">
-            <span class="info-label">Appareil :</span>
-            <span class="info-val">${rep.appareilType || 'Téléphone'} ${rep.marque || ''} ${rep.modele || ''}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Technicien SAV :</span>
-            <span class="info-val">${(rep.reparateurNom || rep.technicien || rep.creePar || userStoredName || 'Atelier SAV').toUpperCase()}</span>
-          </div>
-        </div>
-
-        <div class="divider-dashed"></div>
-
-        <div>
-          ${pieces.length > 0 ? `
-            <div class="section-title">PIÈCES DE RECHANGE UTILISÉES</div>
-            <table class="items-table">
-              <thead>
-                <tr>
-                  <th style="width: 40%; text-align: left;">LIBELLE</th>
-                  <th style="width: 15%; text-align: center;">QTE</th>
-                  <th style="width: 22%; text-align: right;">P.U</th>
-                  <th style="width: 23%; text-align: right;">TOTAL</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${piecesRows}
-              </tbody>
-            </table>
-          ` : `
-            <div style="font-size: 12px; font-weight: 800; padding: 2px 0;">
-              Intervention technique & réparation en atelier (Sans pièce de rechange)
+          ${cfg.repairShowDeviceType !== false ? `
+            <div class="info-row">
+              <span class="info-label">Appareil :</span>
+              <span class="info-val">${rep.appareilType || 'Téléphone'} ${rep.marque || ''} ${rep.modele || ''}</span>
             </div>
-          `}
+            ${rep.numeroSerie ? `
+              <div class="info-row">
+                <span class="info-label">N° Série / IMEI :</span>
+                <span class="info-val">${rep.numeroSerie}</span>
+              </div>
+            ` : ''}
+          ` : ''}
+          ${cfg.repairShowTechnician !== false ? `
+            <div class="info-row">
+              <span class="info-label">Technicien SAV :</span>
+              <span class="info-val">${(rep.reparateurNom || rep.technicien || rep.creePar || userStoredName || 'Atelier SAV').toUpperCase()}</span>
+            </div>
+          ` : ''}
         </div>
 
         <div class="divider-dashed"></div>
+
+        ${cfg.repairShowPartsTable !== false ? `
+          <div>
+            ${pieces.length > 0 ? `
+              <div class="section-title">PIÈCES DE RECHANGE UTILISÉES</div>
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40%; text-align: left;">LIBELLE</th>
+                    <th style="width: 15%; text-align: center;">QTE</th>
+                    <th style="width: 22%; text-align: right;">P.U</th>
+                    <th style="width: 23%; text-align: right;">TOTAL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${piecesRows}
+                </tbody>
+              </table>
+            ` : `
+              <div style="font-size: 12px; font-weight: 800; padding: 2px 0;">
+                Intervention technique & réparation en atelier (Sans pièce de rechange)
+              </div>
+            `}
+          </div>
+          <div class="divider-dashed"></div>
+        ` : ''}
 
         <div>
           <table class="totals-table">
@@ -730,15 +783,17 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
               <td>Total Général (TTC) :</td>
               <td style="text-align: right;">${formatCurrencyDz(totalTTC)} DA</td>
             </tr>
-            <tr>
-              <td>Acompte déjà versé :</td>
-              <td style="text-align: right;">-${formatCurrencyDz(acompte)} DA</td>
-            </tr>
+            ${cfg.repairShowAcompte !== false ? `
+              <tr>
+                <td>Acompte déjà versé :</td>
+                <td style="text-align: right;">-${formatCurrencyDz(acompte)} DA</td>
+              </tr>
+            ` : ''}
             <tr style="font-size: 14.5px;">
               <td style="padding: 2px 0;">Net Réglé (Comptant) :</td>
               <td style="text-align: right;">${formatCurrencyDz(montantPaye)} DA</td>
             </tr>
-            ${soldeRestant > 0 ? `
+            ${(cfg.repairShowSoldeDette !== false && soldeRestant > 0) ? `
               <tr style="border-top: 1.5px dashed #000; color: #b91c1c;">
                 <td style="padding-top: 2px;">Reste à payer (Dette) :</td>
                 <td style="text-align: right; padding-top: 2px; font-size: 14px;">${formatCurrencyDz(soldeRestant)} DA</td>
@@ -749,26 +804,31 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
 
         <div class="divider-dashed"></div>
 
-        <div class="barcode-wrapper">
-          ${barcodeUrl ? `<img src="${barcodeUrl}" class="barcode-img" alt="${rep.numeroReparation}" />` : ''}
-          <div class="barcode-num">${rep.numeroReparation}</div>
-        </div>
-
-        <div style="font-size: 11px; font-weight: 800; text-align: center; margin-top: 3px;">
-          Garantie de 30 jours sur les pièces remplacées.<br/>
-          Appareil testé et remis en parfait état de marche.
-        </div>
-
-        <div class="signature-box">
-          <div class="signature-col">
-            <div>Bon pour restitution :</div>
-            <div class="sign-line"></div>
+        ${(cfg.repairShowBarcode !== false && barcodeUrl) ? `
+          <div class="barcode-wrapper">
+            <img src="${barcodeUrl}" class="barcode-img" alt="${rep.numeroReparation}" />
+            <div class="barcode-num">${rep.numeroReparation}</div>
           </div>
-          <div class="signature-col" style="text-align: right;">
-            <div>Responsable Atelier :</div>
-            <div class="sign-line"></div>
+        ` : ''}
+
+        ${(cfg.repairShowWarranty !== false && cfg.repairWarrantyText) ? `
+          <div style="font-size: 11px; font-weight: 800; text-align: center; margin-top: 3px; line-height: 1.3;">
+            ${cfg.repairWarrantyText.replace(/\n/g, '<br/>')}
           </div>
-        </div>
+        ` : ''}
+
+        ${cfg.repairShowSignatures !== false ? `
+          <div class="signature-box">
+            <div class="signature-col">
+              <div>Bon pour restitution :</div>
+              <div class="sign-line"></div>
+            </div>
+            <div class="signature-col" style="text-align: right;">
+              <div>Responsable Atelier :</div>
+              <div class="sign-line"></div>
+            </div>
+          </div>
+        ` : ''}
 
         <div class="cut-space"></div>
       </body>
@@ -791,6 +851,7 @@ export function generateRepairEstimateHtml(rep, settings = null) {
   const is58 = cfg.receiptPaperWidth === '58mm';
   const cWidth = is58 ? 48 : Math.min(Number(cfg.receiptContentWidth) || 68, 70);
   const mLeft = cfg.receiptMarginLeft !== undefined ? cfg.receiptMarginLeft : 0;
+  const docTitle = cfg.repairEstimateTitle || '★ DEVIS ESTIMATIF RÉPARATION ★';
 
   return `
     <!DOCTYPE html>
@@ -827,11 +888,22 @@ export function generateRepairEstimateHtml(rep, settings = null) {
         </style>
       </head>
       <body>
-        <div class="text-center">
-          <div class="store-title">${cfg.storeName || 'COMMERCE PRO'}</div>
-          <div>${cfg.storePhone ? 'Tél: ' + cfg.storePhone : ''}</div>
+        ${(cfg.repairShowLogo !== false && cfg.showReceiptLogo && cfg.storeLogo) ? `
+          <div style="text-align: center; margin-bottom: 4px;">
+            <img src="${cfg.storeLogo}" alt="Logo" style="max-width: 120px; max-height: 50px; object-fit: contain; margin: 0 auto; display: block;" />
+          </div>
+        ` : ''}
+
+        ${cfg.repairShowStoreHeader !== false ? `
+          <div class="text-center">
+            <div class="store-title">${cfg.storeName || 'COMMERCE PRO'}</div>
+            <div>${cfg.storePhone ? 'Tél: ' + cfg.storePhone : ''}</div>
+          </div>
           <div class="divider"></div>
-          <div class="doc-title">★ DEVIS ESTIMATIF RÉPARATION ★</div>
+        ` : ''}
+
+        <div class="text-center">
+          <div class="doc-title">${docTitle}</div>
           <div style="font-size: 14px; font-weight: 900;">${rep.numeroReparation}</div>
           <div>Date : ${dateStr}</div>
         </div>
@@ -839,17 +911,25 @@ export function generateRepairEstimateHtml(rep, settings = null) {
         <div>
           <div class="info-row"><span>Client :</span><span>${rep.clientNom || 'Client'}</span></div>
           <div class="info-row"><span>Téléphone :</span><span>${rep.clientTelephone || '-'}</span></div>
-          <div class="info-row"><span>Appareil :</span><span>${rep.marque || ''} ${rep.modele || ''}</span></div>
-          <div class="info-row"><span>Panne :</span><span>${rep.panneDeclaree || '-'}</span></div>
+          ${cfg.repairShowDeviceType !== false ? `
+            <div class="info-row"><span>Appareil :</span><span>${rep.marque || ''} ${rep.modele || ''}</span></div>
+          ` : ''}
+          ${cfg.repairShowIssue !== false ? `
+            <div class="info-row"><span>Panne :</span><span>${rep.panneDeclaree || '-'}</span></div>
+          ` : ''}
         </div>
         <div class="divider"></div>
         <div class="total-box">
           TOTAL DEVIS ESTIMÉ : ${formatCurrencyDz(devis)} DA
         </div>
-        <div style="font-size: 10px; text-align: justify; margin-top: 5px; line-height: 1.25;">
-          Ce devis est valable 15 jours. L'accord du client est obligatoire avant intervention.
-        </div>
-        ${barcodeUrl ? `<div class="text-center" style="margin-top: 6px;"><img src="${barcodeUrl}" style="max-width: 80%; height: 35px;" /></div>` : ''}
+        ${(cfg.repairShowConditions !== false && cfg.repairEstimateText) ? `
+          <div style="font-size: 10px; text-align: justify; margin-top: 5px; line-height: 1.25;">
+            ${cfg.repairEstimateText.replace(/\n/g, '<br/>')}
+          </div>
+        ` : ''}
+        ${(cfg.repairShowBarcode !== false && barcodeUrl) ? `
+          <div class="text-center" style="margin-top: 6px;"><img src="${barcodeUrl}" style="max-width: 80%; height: 35px;" /></div>
+        ` : ''}
       </body>
     </html>
   `;

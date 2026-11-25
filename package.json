@@ -1,6 +1,6 @@
 {
   "name": "commercepro",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Commerce Pro - Application Desktop de Gestion Commerciale, Stock, Facturation et SAV",
   "main": "electron/main.js",
   "private": true,
