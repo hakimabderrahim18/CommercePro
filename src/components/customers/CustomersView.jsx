@@ -72,13 +72,6 @@ export default function CustomersView({ isActive = true }) {
     fetchCustomers();
   }, [search, onlyWithDebt]);
 
-  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
-  useEffect(() => {
-    if (isActive) {
-      fetchCustomers();
-    }
-  }, [isActive]);
-
   // Synchronisation temps réel : Recharger immédiatement sur toute modification
   useEffect(() => {
     const handleDataChange = () => {

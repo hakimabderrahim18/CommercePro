@@ -738,12 +738,12 @@ export function generateReceiptHtml({
             margin-left: ${mLeft ? `${mLeft}mm` : '0mm'} !important;
             margin-right: auto !important;
             padding-left: 0.5mm !important;
-            padding-right: 1.5mm !important;
+            padding-right: 3mm !important;
             padding-top: 2mm !important;
             padding-bottom: 5mm !important;
             box-sizing: border-box;
             text-align: center;
-            overflow: hidden !important;
+            overflow: visible !important;
             ${rot !== 0 ? `transform: rotate(${rot}deg); transform-origin: top center;` : ''}
           }
           .logo-wrapper {
@@ -1120,13 +1120,13 @@ export function generatePurchaseReceiptHtml({
             margin-left: ${mLeft ? `${mLeft}mm` : '0mm'} !important;
             margin-right: auto !important;
             padding-left: 0.5mm !important;
-            padding-right: 1.5mm !important;
+            padding-right: 3mm !important;
             padding-top: 2mm !important;
             padding-bottom: 4mm !important;
             box-sizing: border-box;
             color: #000;
             text-align: center;
-            overflow: hidden !important;
+            overflow: visible !important;
             ${rot !== 0 ? `transform: rotate(${rot}deg); transform-origin: top center;` : ''}
           }
           .header { text-align: center; margin-bottom: 6px; }
@@ -1286,8 +1286,15 @@ export async function printHtmlContent(html, {
   copies = 1,
   margins = undefined 
 } = {}) {
-  // Always default pageSize to 80mm thermal roll { width: 80000, height: 297000 } if undefined
-  const effectivePageSize = pageSize !== undefined ? pageSize : { width: 80000, height: 297000 };
+  // Détection intelligente du format si non spécifié (A4 vs ticket thermique)
+  let effectivePageSize = pageSize;
+  if (effectivePageSize === undefined || effectivePageSize === 'auto') {
+    if (html && (html.includes('size: A4') || html.includes('size: a4') || html.includes('A4 portrait') || html.includes('page-container'))) {
+      effectivePageSize = 'A4';
+    } else {
+      effectivePageSize = { width: 80000, height: 297000 };
+    }
+  }
 
   // 1. Tenter via Electron direct IPC si disponible
   if (window.api && window.api.print && typeof window.api.print.html === 'function') {
@@ -1741,7 +1748,7 @@ export function generateSituationReceiptHtml({
   const now = new Date();
   const dateFormatted = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}-${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-  const rowsHtml = (invoices || []).slice(0, 20).map((inv) => {
+  const rowsHtml = (invoices || []).map((inv) => {
     const d = new Date(inv.dateFacture || inv.dateFactureAchat || inv.createdAt || Date.now());
     const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
     const num = String(inv.numeroFacture || inv.numeroFactureAchat || '').trim();
@@ -1758,6 +1765,8 @@ export function generateSituationReceiptHtml({
     `;
   }).join('');
 
+  const mLeft = cfg.receiptMarginLeft !== undefined ? cfg.receiptMarginLeft : 0;
+
   return `
     <!DOCTYPE html>
     <html>
@@ -1770,10 +1779,15 @@ export function generateSituationReceiptHtml({
           body {
             margin: 0; padding: 0; background: #fff; color: #000;
             font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 12px; font-weight: 900; line-height: 1.25;
+            font-size: 11.5px; font-weight: 900; line-height: 1.25;
           }
           .container {
-            width: ${cWidth}mm; max-width: 100%; margin: 0 auto; padding: 3mm 1mm;
+            width: ${cWidth}mm !important;
+            max-width: ${cWidth}mm !important;
+            margin-left: ${mLeft ? `${mLeft}mm` : '0mm'} !important;
+            margin-right: auto !important;
+            padding: 3mm 3.5mm 4mm 1mm;
+            box-sizing: border-box !important;
           }
           .divider { border-top: 1.5px dashed #000; margin: 4px 0; }
           .center { text-align: center; }
@@ -2093,6 +2107,7 @@ export function generatePaymentReceiptHtml({
     'AUTRE': 'Autre'
   };
   const modeStr = modeLabels[modeReglement] || modeReglement || 'Espèces';
+  const mLeft = cfg.receiptMarginLeft !== undefined ? cfg.receiptMarginLeft : 0;
 
   return `
     <!DOCTYPE html>
@@ -2106,10 +2121,15 @@ export function generatePaymentReceiptHtml({
           body {
             margin: 0; padding: 0; background: #fff; color: #000;
             font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 12px; font-weight: 800; line-height: 1.25;
+            font-size: 11.5px; font-weight: 800; line-height: 1.25;
           }
           .container {
-            width: ${cWidth}mm; max-width: 100%; margin: 0 auto; padding: 3mm 1mm;
+            width: ${cWidth}mm !important;
+            max-width: ${cWidth}mm !important;
+            margin-left: ${mLeft ? `${mLeft}mm` : '0mm'} !important;
+            margin-right: auto !important;
+            padding: 3mm 3.5mm 4mm 1mm;
+            box-sizing: border-box !important;
           }
           .divider { border-top: 1.5px dashed #000; margin: 4px 0; }
           .double-divider { border-top: 2px solid #000; margin: 5px 0; }

@@ -366,12 +366,10 @@ export default function PosView({
     }
   };
 
-  // Synchronisation temps réel : Recharger dès que l'onglet POS devient actif
+  // Chargement initial des données au montage du panier
   useEffect(() => {
-    if (isActive) {
-      loadData();
-    }
-  }, [isActive]);
+    loadData();
+  }, []);
 
   // Synchronisation temps réel : Recharger les produits dès qu'une modification survient ailleurs
   useEffect(() => {
@@ -449,36 +447,29 @@ export default function PosView({
     showNotification('Nouveau ticket de caisse initialisé.', 'info');
   };
 
-  // Rechargement automatique dès que l'onglet POS s'ouvre ou devient actif
+  // Focus instantané sur le lecteur code-barres dès que l'onglet POS devient actif
   useEffect(() => {
-    if (isActive) {
-      loadData();
-      if (scanInputRef.current) {
-        scanInputRef.current.focus();
-      }
+    if (isActive && scanInputRef.current) {
+      scanInputRef.current.focus();
     }
   }, [isActive]);
 
   // Synchronisation inter-vues (actualisation automatique si un client, dette, achat ou produit change ailleurs)
   useEffect(() => {
     const handleRefreshAll = () => {
-      if (isActive) {
-        loadData();
-      }
+      loadData();
     };
     window.addEventListener('customer-updated', handleRefreshAll);
     window.addEventListener('stock-updated', handleRefreshAll);
     window.addEventListener('invoice-updated', handleRefreshAll);
     window.addEventListener('supplier-updated', handleRefreshAll);
-    window.addEventListener('focus', handleRefreshAll);
     return () => {
       window.removeEventListener('customer-updated', handleRefreshAll);
       window.removeEventListener('stock-updated', handleRefreshAll);
       window.removeEventListener('invoice-updated', handleRefreshAll);
       window.removeEventListener('supplier-updated', handleRefreshAll);
-      window.removeEventListener('focus', handleRefreshAll);
     };
-  }, [isActive]);
+  }, []);
 
   // Suggestions de recherche instantanées dès la frappe (nom, référence, code-barres, multi-mots, sans accents)
   const searchResults = useMemo(() => {

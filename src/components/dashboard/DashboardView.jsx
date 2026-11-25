@@ -54,13 +54,6 @@ export default function DashboardView({ isActive = true, onNavigateToStock, onNa
     fetchDashboardData();
   }, []);
 
-  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
-  useEffect(() => {
-    if (isActive) {
-      fetchDashboardData();
-    }
-  }, [isActive]);
-
   // Synchronisation temps réel : Recharger immédiatement sur toute modification (vente, stock, SAV)
   useEffect(() => {
     const handleDataChange = () => {

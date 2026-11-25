@@ -106,13 +106,6 @@ export default function TreasuryView({ isActive = true }) {
     fetchTransactions();
   }, [typeFilter, search, modePaiement, categorie, caisseFilter, period, startDate, endDate]);
 
-  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
-  useEffect(() => {
-    if (isActive) {
-      fetchTransactions();
-    }
-  }, [isActive]);
-
   // Synchronisation temps réel : Recharger immédiatement sur toute modification
   useEffect(() => {
     const handleDataChange = () => {

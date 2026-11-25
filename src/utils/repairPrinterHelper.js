@@ -356,6 +356,10 @@ export function generateRepairReceiptHtml(rep, settings = null) {
   const devisStr = formatDzDec(devisVal);
   const versementStr = formatDzDec(acompteVal);
 
+  const is58 = cfg.receiptPaperWidth === '58mm';
+  const cWidth = is58 ? 48 : Math.min(Number(cfg.receiptContentWidth) || 68, 70);
+  const mLeft = cfg.receiptMarginLeft !== undefined ? cfg.receiptMarginLeft : 0;
+
   return `
     <!DOCTYPE html>
     <html>
@@ -376,16 +380,18 @@ export function generateRepairReceiptHtml(rep, settings = null) {
             -webkit-print-color-adjust: exact !important;
           }
           body {
-            width: 70mm !important;
-            max-width: 70mm !important;
-            margin: 0 auto !important;
-            padding: 3mm 1mm;
+            width: ${cWidth}mm !important;
+            max-width: ${cWidth}mm !important;
+            margin-left: ${mLeft ? `${mLeft}mm` : '0mm'} !important;
+            margin-right: auto !important;
+            padding: 3mm 3.5mm 4mm 1mm;
             background: #fff;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 700;
             line-height: 1.35;
             text-align: center;
-            overflow: hidden !important;
+            box-sizing: border-box !important;
+            word-break: break-word !important;
           }
           .logo-wrapper {
             text-align: center;
@@ -595,6 +601,10 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
 
   const docTitle = isReturn ? 'BON DE RETOUR SAV (AVOIR)' : 'BON DE LIVRAISON & RESTITUTION SAV';
 
+  const is58 = cfg.receiptPaperWidth === '58mm';
+  const cWidth = is58 ? 48 : Math.min(Number(cfg.receiptContentWidth) || 68, 70);
+  const mLeft = cfg.receiptMarginLeft !== undefined ? cfg.receiptMarginLeft : 0;
+
   return `
     <!DOCTYPE html>
     <html>
@@ -604,29 +614,42 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
         <style>
           @page { margin: 0; size: auto; }
           * { box-sizing: border-box; margin: 0; padding: 0; color: #000 !important; font-family: Arial, "Helvetica Neue", sans-serif; -webkit-print-color-adjust: exact !important; }
-          body { width: 70mm !important; max-width: 70mm !important; margin: 0 auto !important; padding: 2mm 1mm; background: #fff; font-size: 12px; font-weight: 900 !important; line-height: 1.25; overflow: hidden !important; }
+          body { 
+            width: ${cWidth}mm !important; 
+            max-width: ${cWidth}mm !important; 
+            margin-left: ${mLeft ? `${mLeft}mm` : '0mm'} !important; 
+            margin-right: auto !important; 
+            padding: 2mm 3.5mm 4mm 1mm; 
+            background: #fff; 
+            font-size: 11.5px; 
+            font-weight: 900 !important; 
+            line-height: 1.25; 
+            box-sizing: border-box !important;
+            word-break: break-word !important;
+          }
           .text-center { text-align: center; }
           .logo-wrapper { text-align: center; margin: 0 auto 4px auto; }
           .store-logo-img { max-width: 130px; max-height: 65px; object-fit: contain; margin: 0 auto; display: block; filter: grayscale(100%); }
-          .store-title { font-size: 18px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 1px; }
-          .store-sub { font-size: 13px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 2px; }
-          .store-contact { font-size: 11.5px; font-weight: 900 !important; }
-          .doc-title { font-size: 14px; font-weight: 900 !important; text-transform: uppercase; margin: 4px 0 2px 0; letter-spacing: 0.5px; }
-          .rep-num { font-size: 16px; font-weight: 900 !important; letter-spacing: 1px; margin-bottom: 2px; }
+          .store-title { font-size: 17px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 1px; }
+          .store-sub { font-size: 12px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 2px; }
+          .store-contact { font-size: 11px; font-weight: 900 !important; }
+          .doc-title { font-size: 13px; font-weight: 900 !important; text-transform: uppercase; margin: 4px 0 2px 0; letter-spacing: 0.2px; }
+          .rep-num { font-size: 15px; font-weight: 900 !important; letter-spacing: 0.8px; margin-bottom: 2px; }
           .divider-dashed { width: 100%; border-top: 1.5px dashed #000; margin: 4px 0; font-size: 0; }
-          .section-title { font-size: 12px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 2px; text-decoration: underline; }
-          .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.5px 0; font-size: 12px; }
-          .info-label { font-weight: 900 !important; text-transform: uppercase; }
-          .info-val { font-weight: 900 !important; text-align: right; }
-          table.items-table { width: 100%; border-collapse: collapse; margin: 3px 0; font-size: 12px; }
-          table.items-table th { padding: 3px 0; font-size: 11px; font-weight: 900 !important; text-transform: uppercase; border-bottom: 1px solid #000; }
-          .totals-table { width: 100%; border-collapse: collapse; margin: 3px 0; }
-          .totals-table td { padding: 2px 0; font-size: 13px; font-weight: 900 !important; }
+          .section-title { font-size: 11.5px; font-weight: 900 !important; text-transform: uppercase; margin-bottom: 2px; text-decoration: underline; }
+          .info-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; padding: 1.5px 0; font-size: 11.5px; width: 100%; box-sizing: border-box; }
+          .info-label { font-weight: 900 !important; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+          .info-val { font-weight: 900 !important; text-align: right; word-break: break-word; max-width: 65%; }
+          table.items-table { width: 100%; border-collapse: collapse; margin: 3px 0; font-size: 11.5px; box-sizing: border-box; }
+          table.items-table th { padding: 3px 0; font-size: 10.5px; font-weight: 900 !important; text-transform: uppercase; border-bottom: 1px solid #000; }
+          .totals-table { width: 100%; border-collapse: collapse; margin: 3px 0; box-sizing: border-box; }
+          .totals-table td { padding: 2px 0; font-size: 12.5px; font-weight: 900 !important; }
           .barcode-wrapper { text-align: center; margin: 6px auto 3px auto; }
           .barcode-img { max-width: 85%; height: 40px; object-fit: contain; margin: 0 auto; display: block; }
-          .barcode-num { font-family: monospace; font-size: 13px; letter-spacing: 1.5px; margin-top: 2px; }
-          .signature-box { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; font-weight: 900 !important; }
-          .sign-line { width: 45%; height: 35px; border-bottom: 1px solid #000; margin-top: 2px; }
+          .barcode-num { font-family: monospace; font-size: 12.5px; letter-spacing: 1px; margin-top: 2px; }
+          .signature-box { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 10.5px; font-weight: 900 !important; width: 100%; box-sizing: border-box; }
+          .signature-col { width: 48%; }
+          .sign-line { width: 100%; height: 28px; border-bottom: 1px solid #000; margin-top: 2px; }
           .cut-space { height: 5mm; }
         </style>
       </head>
@@ -737,13 +760,13 @@ export function generateRepairDeliveryHtml(rep, isReturn = false, settings = nul
         </div>
 
         <div class="signature-box">
-          <div>
+          <div class="signature-col">
             <div>Bon pour restitution :</div>
             <div class="sign-line"></div>
           </div>
-          <div style="text-align: right;">
+          <div class="signature-col" style="text-align: right;">
             <div>Responsable Atelier :</div>
-            <div class="sign-line" style="margin-left: auto;"></div>
+            <div class="sign-line"></div>
           </div>
         </div>
 
@@ -765,6 +788,10 @@ export function generateRepairEstimateHtml(rep, settings = null) {
   const coutMO = Number(rep.coutMainOeuvre || 0);
   const devis = Number(rep.estimationDevis || (coutPieces + coutMO) || 0);
 
+  const is58 = cfg.receiptPaperWidth === '58mm';
+  const cWidth = is58 ? 48 : Math.min(Number(cfg.receiptContentWidth) || 68, 70);
+  const mLeft = cfg.receiptMarginLeft !== undefined ? cfg.receiptMarginLeft : 0;
+
   return `
     <!DOCTYPE html>
     <html>
@@ -773,16 +800,30 @@ export function generateRepairEstimateHtml(rep, settings = null) {
         <title>Devis Réparation - ${rep.numeroReparation}</title>
         <style>
           @page { margin: 0; size: auto; }
-          * { box-sizing: border-box; margin: 0; padding: 0; color: #000 !important; font-family: Arial, sans-serif; }
-          body { width: 100%; max-width: 100%; margin: 0; padding: 4mm 2mm; background: #fff; font-size: 12px; font-weight: 800; line-height: 1.3; }
+          * { box-sizing: border-box; margin: 0; padding: 0; color: #000 !important; font-family: Arial, "Helvetica Neue", sans-serif; -webkit-print-color-adjust: exact !important; }
+          body { 
+            width: ${cWidth}mm !important; 
+            max-width: ${cWidth}mm !important; 
+            margin-left: ${mLeft ? `${mLeft}mm` : '0mm'} !important; 
+            margin-right: auto !important; 
+            padding: 3mm 3.5mm 4mm 1mm; 
+            background: #fff; 
+            font-size: 11.5px; 
+            font-weight: 800; 
+            line-height: 1.3; 
+            box-sizing: border-box !important;
+            word-break: break-word !important;
+          }
           .text-center { text-align: center; }
-          .store-title { font-size: 17px; font-weight: 900; text-transform: uppercase; }
-          .doc-title { font-size: 15px; font-weight: 900; margin: 4px 0; }
-          .divider { border-top: 1.5px dashed #000; margin: 5px 0; }
-          .info-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
-          .table { width: 100%; border-collapse: collapse; margin: 5px 0; }
-          .table th, .table td { border-bottom: 1px solid #ddd; padding: 3px 0; font-size: 11px; }
-          .total-box { border: 1.5px solid #000; padding: 6px; margin: 6px 0; text-align: center; font-size: 15px; font-weight: 900; }
+          .store-title { font-size: 16px; font-weight: 900; text-transform: uppercase; margin-bottom: 1px; }
+          .doc-title { font-size: 13px; font-weight: 900; margin: 4px 0 2px 0; letter-spacing: 0.2px; word-break: break-word; }
+          .divider { border-top: 1.5px dashed #000; margin: 4px 0; }
+          .info-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; margin-bottom: 2px; width: 100%; box-sizing: border-box; }
+          .info-row span:first-child { font-weight: 900; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+          .info-row span:last-child { text-align: right; word-break: break-word; max-width: 65%; font-weight: 800; }
+          .table { width: 100%; border-collapse: collapse; margin: 4px 0; box-sizing: border-box; }
+          .table th, .table td { border-bottom: 1px solid #ddd; padding: 2.5px 0; font-size: 11px; }
+          .total-box { border: 1.5px solid #000; padding: 5px 3px; margin: 5px 0; text-align: center; font-size: 13.5px; font-weight: 900; word-break: break-word; }
         </style>
       </head>
       <body>
@@ -805,7 +846,7 @@ export function generateRepairEstimateHtml(rep, settings = null) {
         <div class="total-box">
           TOTAL DEVIS ESTIMÉ : ${formatCurrencyDz(devis)} DA
         </div>
-        <div style="font-size: 10px; text-align: justify; margin-top: 5px;">
+        <div style="font-size: 10px; text-align: justify; margin-top: 5px; line-height: 1.25;">
           Ce devis est valable 15 jours. L'accord du client est obligatoire avant intervention.
         </div>
         ${barcodeUrl ? `<div class="text-center" style="margin-top: 6px;"><img src="${barcodeUrl}" style="max-width: 80%; height: 35px;" /></div>` : ''}

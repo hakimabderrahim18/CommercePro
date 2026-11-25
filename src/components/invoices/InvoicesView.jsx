@@ -100,13 +100,6 @@ export default function InvoicesView({ isActive = true, onNewSale, initialInvoic
     fetchInvoices();
   }, [search, typeDocument, statutPaiement, period, startDate, endDate]);
 
-  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
-  useEffect(() => {
-    if (isActive) {
-      fetchInvoices();
-    }
-  }, [isActive]);
-
   // Synchronisation temps réel : Recharger immédiatement sur toute modification
   useEffect(() => {
     const handleDataChange = () => {

@@ -24,10 +24,6 @@ export default function SuppliersView({ isActive = true }) {
   };
 
   useEffect(() => {
-    if (isActive) setRefreshKey(k => k + 1);
-  }, [isActive]);
-
-  useEffect(() => {
     const handleDataChange = () => setRefreshKey(k => k + 1);
     window.addEventListener('app:refresh-data', handleDataChange);
     return () => window.removeEventListener('app:refresh-data', handleDataChange);

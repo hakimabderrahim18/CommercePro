@@ -171,7 +171,11 @@ function registerPrintHandlers(mainWindow) {
       // Résolution du format de papier (pageSize)
       let effectivePageSize = pageSize;
       if (!effectivePageSize || effectivePageSize === 'auto') {
-        effectivePageSize = { width: 80000, height: 297000 };
+        if (html && (html.includes('size: A4') || html.includes('size: a4') || html.includes('A4 portrait') || html.includes('page-container'))) {
+          effectivePageSize = 'A4';
+        } else {
+          effectivePageSize = { width: 80000, height: 297000 };
+        }
       } else if (typeof effectivePageSize === 'string') {
         const s = effectivePageSize.toLowerCase().trim();
         if (s === '80mm' || s === '80' || s.includes('80')) {
@@ -179,6 +183,29 @@ function registerPrintHandlers(mainWindow) {
         } else if (s === '58mm' || s === '58' || s.includes('58')) {
           effectivePageSize = { width: 58000, height: 297000 };
         }
+      }
+
+      // Si rouleau thermique (width 80mm ou 58mm), mesurer la hauteur réelle du contenu pour ne jamais tronquer en bas
+      if (typeof effectivePageSize === 'object' && effectivePageSize && effectivePageSize.width) {
+        try {
+          const contentHeightPx = await printWin.webContents.executeJavaScript(`
+            Math.max(
+              document.body ? document.body.scrollHeight : 0,
+              document.documentElement ? document.documentElement.scrollHeight : 0,
+              document.body ? document.body.offsetHeight : 0
+            )
+          `);
+          if (contentHeightPx && contentHeightPx > 0) {
+            // Conversion 96 DPI vers microns (1px ≈ 265 microns) + 15mm de marge de sécurité
+            const measuredMicrons = Math.ceil(contentHeightPx * 265) + 15000;
+            if (measuredMicrons > effectivePageSize.height) {
+              effectivePageSize = {
+                width: effectivePageSize.width,
+                height: measuredMicrons
+              };
+            }
+          }
+        } catch (hErr) {}
       }
 
       const baseOpts = {

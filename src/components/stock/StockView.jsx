@@ -115,13 +115,6 @@ export default function StockView({ isActive = true, onNewProductTrigger }) {
     fetchProducts();
   }, [search, selectedCategory, lowStockOnly]);
 
-  // Synchronisation temps réel : Recharger dès que l'onglet Stock devient actif
-  useEffect(() => {
-    if (isActive) {
-      fetchProducts();
-    }
-  }, [isActive]);
-
   // Synchronisation temps réel : Écouter les ventes, achats et mouvements
   useEffect(() => {
     const handleDataChange = () => {

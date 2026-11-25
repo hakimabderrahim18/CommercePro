@@ -92,13 +92,6 @@ export default function MovementsView({ isActive = true }) {
     loadData();
   }, [selectedType, period, startDate, endDate, search]);
 
-  // Synchronisation temps réel : Recharger dès que l'onglet devient actif
-  useEffect(() => {
-    if (isActive) {
-      loadData();
-    }
-  }, [isActive]);
-
   // Synchronisation temps réel : Recharger immédiatement sur toute modification
   useEffect(() => {
     const handleDataChange = () => {

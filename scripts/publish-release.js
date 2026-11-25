@@ -17,16 +17,17 @@ function getGithubToken() {
 const GITHUB_TOKEN = getGithubToken();
 const OWNER = 'hakimabderrahim18';
 const REPO = 'CommercePro';
-const TAG = 'v1.0.1';
-const NAME = 'Commerce Pro v1.0.1';
-const BODY = `## Commerce Pro v1.0.1 - Mise à jour officielle
+const TAG = 'v1.0.2';
+const NAME = 'Commerce Pro v1.0.2';
+const BODY = `## Commerce Pro v1.0.2 - Mise à jour officielle
 
-### Nouveautés :
-- Option d'activation/désactivation du verrouillage de session (Login).
-- Option configurable pour afficher ou masquer le bouton d'Accès Direct sur la page de connexion.
-- Impression instantanée des reçus lors de chaque versement client ou fournisseur.
-- Impression thermique SPRT 80mm complète des relevés de compte.
-- Fix et normalisation des thèmes et des polices.
+### Nouveautés & Corrections :
+- **Cadrage parfait à l'impression thermique (SPRT 80mm / POS-80) :**
+  - Élimination des coupures de texte sur la droite (Devis SAV, Bons de restitution & livraison, Tickets de caisse, Reçus de versement).
+  - Plus de coupure de "DA", des numéros de téléphone ou des noms de clients.
+  - Calcul dynamique de la hauteur pour les longs tickets.
+- **Performances ultra rapides :**
+  - Changement d'onglet et de fenêtre instantané (0 ms) sans rechargement excessif de la base de données.
 `;
 
 function request(options, data) {
@@ -147,9 +148,9 @@ async function main() {
   }
 
   // 2. Upload the zip asset
-  const zipPath = path.resolve(__dirname, '../release/CommercePro-v1.0.1-windows.zip');
+  const zipPath = path.resolve(__dirname, `../release/CommercePro-${TAG}-windows.zip`);
   if (fs.existsSync(zipPath)) {
-    await uploadAsset(release.upload_url, zipPath, 'CommercePro-v1.0.1-windows.zip');
+    await uploadAsset(release.upload_url, zipPath, `CommercePro-${TAG}-windows.zip`);
   } else {
     console.error(`Zip file not found at ${zipPath}`);
   }
